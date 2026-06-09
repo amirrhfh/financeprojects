@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCTS Dashboard · Covered Call Manager</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;900&display=swap');
+
+/* ══ CSS VARIABLES — DARK (default) & LIGHT ══ */
+:root {
+  --bg:#080b10; --s1:#0e1219; --s2:#141922; --s3:#1a2130;
+  --b1:#1e2736; --b2:#263040; --b3:#2e3a4e;
+  --gold:#d4a853; --gold2:#f0c060; --golddim:#8a6b2e;
+  --green:#2ecc71; --greendim:rgba(46,204,113,.15);
+  --red:#e74c3c; --reddim:rgba(231,76,60,.15);
+  --blue:#3b9ede; --bluedim:rgba(59,158,222,.15);
+  --warn:#f0a030; --warndim:rgba(240,160,48,.15);
+  --purple:#9b59b6; --purpledim:rgba(155,89,182,.15);
+  --text:#dde3ee; --text2:#8a97ad; --text3:#4a5568; --text4:#2d3748;
+  --r:10px; --r2:6px;
+  --chart-grid:rgba(30,39,55,.6);
+  --tbl-hover:rgba(255,255,255,.02);
+  --shadow:none;
+}
+
+/* ══ LIGHT MODE ══ */
+html.light {
+  --bg:#f0f2f5; --s1:#ffffff; --s2:#f7f8fa; --s3:#eef0f3;
+  --b1:#dde1e9; --b2:#c8cdd8; --b3:#b5bcc9;
+  --gold:#b8861c; --gold2:#9a6e10; --golddim:#f5e8cc;
+  --green:#1a9e52; --greendim:rgba(26,158,82,.12);
+  --red:#c0392b; --reddim:rgba(192,57,43,.12);
+  --blue:#2276b5; --bluedim:rgba(34,118,181,.12);
+  --warn:#c07010; --warndim:rgba(192,112,16,.12);
+  --purple:#7d3c98; --purpledim:rgba(125,60,152,.12);
+  --text:#1a2133; --text2:#4a5568; --text3:#8a97ad; --text4:#b5bcc9;
+  --chart-grid:rgba(180,190,210,.4);
+  --tbl-hover:rgba(0,0,0,.025);
+  --shadow:0 1px 4px rgba(0,0,0,.08);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Vazirmatn',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl;transition:background .25s,color .25s}
+
+/* ══ TOPBAR ══ */
+.topbar{background:var(--s1);border-bottom:1px solid var(--b1);padding:0 24px;display:flex;align-items:stretch;gap:0;position:sticky;top:0;z-index:200;box-shadow:var(--shadow)}
+.topbar-brand{display:flex;align-items:center;gap:10px;padding:12px 20px 12px 0;border-left:1px solid var(--b1);margin-left:4px}
+.brand-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),#a07020);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#000}
+.brand-text h1{font-size:15px;font-weight:700;color:var(--text)}
+.brand-text p{font-size:11px;color:var(--text2)}
+
+/* ══ TABS ══ */
+.tabs{display:flex;align-items:center;gap:2px;padding:0 8px;flex:1}
+.tab{padding:0 18px;height:52px;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab:hover{color:var(--text);background:rgba(128,128,128,.05)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-icon{font-size:14px}
+
+.topbar-right{display:flex;align-items:center;gap:12px;padding-right:8px;margin-right:auto}
+.update-label{font-size:11px;color:var(--text3)}
+
+/* ══ THEME TOGGLE ══ */
+.theme-btn{
+  background:var(--s2);border:1px solid var(--b1);border-radius:20px;
+  padding:5px 12px;font-size:12px;font-weight:600;color:var(--text2);
+  cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;
+  font-family:'Vazirmatn',sans-serif;
+}
+.theme-btn:hover{border-color:var(--gold);color:var(--gold)}
+.theme-icon{font-size:14px}
+
+/* ══ LIVE BADGE ══ */
+.live-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:3px 8px;color:var(--text3)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+.live-badge.live-connected{border-color:rgba(46,204,113,.4);color:var(--green)}
+.live-badge.live-disconnected{border-color:rgba(231,76,60,.3);color:var(--red)}
+.live-badge.live-disconnected .live-dot{background:var(--red);box-shadow:0 0 6px var(--red);animation:none}
+
+/* live data source indicator */
+.data-source-banner{
+  background:var(--s2);border-bottom:1px solid var(--b1);
+  padding:4px 24px;font-size:11px;color:var(--text3);
+  display:flex;align-items:center;gap:8px;
+}
+.ds-label{font-weight:600}
+.ds-manual{color:var(--warn)}
+.ds-live{color:var(--green)}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ══ PAGES ══ */
+.page{display:none;padding:20px 24px;max-width:1600px;margin:0 auto}
+.page.active{display:block}
+
+/* ══ CARDS ══ */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.card-note{font-size:11px;color:var(--text3);background:var(--s2);border:1px solid var(--b1);padding:2px 8px;border-radius:10px}
+
+/* ══ GRID ══ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.s2{grid-column:span 2}.s3{grid-column:span 3}.s4{grid-column:span 4}
+.gap{margin-bottom:14px}
+
+/* ══ KPI ══ */
+.kpi{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.kpi::after{content:'';position:absolute;top:0;right:0;width:3px;height:100%;border-radius:0 var(--r) var(--r) 0}
+.kpi.g::after{background:var(--gold)}
+.kpi.gr::after{background:var(--green)}
+.kpi.re::after{background:var(--red)}
+.kpi.bl::after{background:var(--blue)}
+.kpi.pu::after{background:var(--purple)}
+.kpi-lbl{font-size:11px;color:var(--text2);margin-bottom:6px}
+/* exact value style — smaller font for long numbers */
+.kpi-val{font-size:18px;font-weight:700;line-height:1.2;margin-bottom:4px;word-break:break-all}
+.kpi-val.g{color:var(--gold)}.kpi-val.gr{color:var(--green)}.kpi-val.re{color:var(--red)}.kpi-val.bl{color:var(--blue)}.kpi-val.pu{color:var(--purple)}
+.kpi-sub{font-size:11px;color:var(--text2)}
+.kpi-unit{font-size:10px;font-weight:400;color:var(--text3);margin-right:4px}
+
+/* ══ STAT ROW ══ */
+.srow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--b1)}
+.srow:last-child{border-bottom:none}
+.srow-lbl{font-size:12px;color:var(--text2)}
+.srow-val{font-size:13px;font-weight:600}
+.pos{color:var(--green)}.neg{color:var(--red)}.neu{color:var(--text)}.warn{color:var(--warn)}.gold{color:var(--gold)}
+
+/* ══ TABLES ══ */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:11px;color:var(--text3);font-weight:600;padding:8px 10px;text-align:right;border-bottom:1px solid var(--b1);background:var(--s2);white-space:nowrap}
+.tbl td{padding:9px 10px;font-size:12px;border-bottom:1px solid var(--b1);vertical-align:middle}
+.tbl tr:hover td{background:var(--tbl-hover)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl-scroll{overflow-x:auto}
+
+/* ══ BADGES ══ */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-long{background:var(--greendim);color:var(--green);border:1px solid rgba(46,204,113,.3)}
+.badge-short{background:var(--reddim);color:var(--red);border:1px solid rgba(231,76,60,.3)}
+.badge-itm{background:var(--warndim);color:var(--warn);border:1px solid rgba(240,160,48,.3)}
+.badge-otm{background:var(--greendim);color:var(--green);border:1px solid rgba(46,204,113,.3)}
+.badge-opt{background:var(--greendim);color:var(--green);border:1px solid rgba(46,204,113,.3)}
+.badge-sub{background:var(--reddim);color:var(--red);border:1px solid rgba(231,76,60,.3)}
+.badge-neu{background:var(--warndim);color:var(--warn);border:1px solid rgba(240,160,48,.3)}
+.badge-live{background:var(--greendim);color:var(--green);border:1px solid rgba(46,204,113,.3);animation:pulse 2s infinite}
+.badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* ══ INPUTS ══ */
+.inp-section{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+.inp-title{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.inp-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.inp-grp{display:flex;flex-direction:column;gap:5px}
+.inp-grp label{font-size:11px;color:var(--text2)}
+.inp{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r2);padding:8px 12px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:13px;width:150px;direction:ltr;text-align:left;transition:border-color .2s}
+.inp:focus{outline:none;border-color:var(--gold)}
+.inp.wide{width:200px}
+/* input override for live data — readonly style */
+.inp.live-override{border-color:rgba(46,204,113,.4);background:rgba(46,204,113,.04)}
+
+.btn{border:none;border-radius:var(--r2);padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Vazirmatn',sans-serif;transition:opacity .2s,transform .1s}
+.btn:hover{opacity:.9;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#a07020);color:#000}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-red{background:var(--red);color:#fff}
+
+/* ══ DIVIDER ══ */
+.div{height:1px;background:var(--b1);margin:14px 0}
+
+/* ══ SECTION LABEL ══ */
+.sec{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+/* ══ CHART ══ */
+canvas{display:block}
+
+/* ══ SCENARIO TABLE ══ */
+.scenario-green td:last-child{color:var(--green)}
+.scenario-red td:last-child{color:var(--red)}
+.scenario-current{background:rgba(212,168,83,.08)!important}
+.scenario-current td{color:var(--gold)!important;font-weight:600}
+
+/* ══ PV METER ══ */
+.pv-bar{height:8px;border-radius:4px;background:var(--s3);overflow:hidden;margin-top:6px}
+.pv-fill{height:100%;border-radius:4px;transition:width .4s}
+.pv-good .pv-fill{background:linear-gradient(90deg,var(--green),#27ae60)}
+.pv-warn .pv-fill{background:linear-gradient(90deg,var(--warn),#e67e22)}
+.pv-bad .pv-fill{background:linear-gradient(90deg,var(--red),#c0392b)}
+
+/* ══ DEAL SCORE ══ */
+.deal-score{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.deal-good{color:var(--green)}.deal-ok{color:var(--warn)}.deal-bad{color:var(--red)}
+
+/* ══ EXPIRY ══ */
+.expiry-big{font-size:44px;font-weight:900;color:var(--gold);line-height:1}
+.expiry-prog{height:5px;background:var(--b1);border-radius:3px;margin-top:10px;overflow:hidden}
+.expiry-prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),#a07020)}
+
+/* ══ LIVE PANEL ══ */
+.live-panel{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:14px 18px;margin-bottom:14px}
+.live-panel-title{font-size:12px;color:var(--text2);font-weight:600;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.live-status-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.live-field{display:flex;flex-direction:column;gap:3px;min-width:140px}
+.live-field label{font-size:10px;color:var(--text3)}
+.live-field span{font-size:13px;font-weight:600;color:var(--text)}
+
+@media(max-width:1100px){.g4{grid-template-columns:1fr 1fr}.s4{grid-column:span 2}}
+@media(max-width:768px){.g2,.g3,.g4,.g5{grid-template-columns:1fr}.s2,.s3,.s4{grid-column:span 1}.page{padding:12px}}
+
+/* ══ CHART TOOLTIP ══ */
+#chart-tooltip {
+  position:fixed; pointer-events:none; z-index:300;
+  background:var(--s1); border:1px solid var(--b2);
+  border-radius:var(--r2); padding:10px 14px;
+  font-size:11px; color:var(--text); min-width:210px;
+  box-shadow:0 4px 16px rgba(0,0,0,.3); display:none;
+}
+#chart-tooltip .tt-date{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px}
+#chart-tooltip .tt-row{display:flex;justify-content:space-between;gap:12px;padding:2px 0;border-bottom:1px solid var(--b1)}
+#chart-tooltip .tt-row:last-child{border-bottom:none}
+#chart-tooltip .tt-lbl{color:var(--text2)}
+#chart-tooltip .tt-val{font-weight:600}
+/* ══ PREMIUM BASIS TOGGLE ══ */
+.prem-toggle{display:flex;gap:0;border:1px solid var(--b2);border-radius:var(--r2);overflow:hidden}
+.prem-toggle-btn{padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:var(--s2);color:var(--text2);border:none;font-family:'Vazirmatn',sans-serif;transition:all .15s}
+.prem-toggle-btn.active{background:var(--gold);color:#000}
+/* ══ CHAIN GROUP HEADER ══ */
+.chain-group-hd{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:10px 16px;margin-bottom:8px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.chain-group-hd .cg-expiry{font-size:13px;font-weight:700;color:var(--gold)}
+.chain-group-hd .cg-stat{font-size:11px;color:var(--text2)}
+.chain-group-hd .cg-stat span{font-weight:600;color:var(--text)}
+</style>
+</head>
+<body>
+<div id="login-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#080b10;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:'Vazirmatn',system-ui,sans-serif;">
+  <div style="background:#0e1219;border:1px solid #1e2736;border-radius:14px;padding:40px 48px;width:340px;text-align:center;">
+    <div style="width:48px;height:48px;background:linear-gradient(135deg,#d4a853,#a07020);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#000;margin:0 auto 16px;">CC</div>
+    <div style="font-size:16px;font-weight:700;color:#dde3ee;margin-bottom:4px;">CCTS Dashboard</div>
+    <div style="font-size:12px;color:#8a97ad;margin-bottom:28px;">Covered Call Manager</div>
+    <input id="login-input" type="password" placeholder="Password" style="width:100%;padding:11px 14px;background:#141922;border:1px solid #263040;border-radius:8px;color:#dde3ee;font-size:14px;font-family:'Vazirmatn',sans-serif;outline:none;text-align:center;letter-spacing:2px;direction:ltr;box-sizing:border-box;" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button onclick="doLogin()" style="width:100%;margin-top:14px;padding:11px;background:linear-gradient(135deg,#d4a853,#a07020);border:none;border-radius:8px;color:#000;font-size:14px;font-weight:700;font-family:'Vazirmatn',sans-serif;cursor:pointer;">Enter</button>
+    <div id="login-error" style="margin-top:12px;font-size:12px;color:#e74c3c;min-height:18px;"></div>
+  </div>
+</div>
+<script>
+function doLogin(){
+  var val=document.getElementById('login-input').value;
+  if(val==='ASAbiASA'){
+    document.getElementById('login-overlay').style.display='none';
+    sessionStorage.setItem('ccts_auth','1');
+  } else {
+    document.getElementById('login-error').textContent='Wrong password. Try again.';
+    document.getElementById('login-input').value='';
+    document.getElementById('login-input').focus();
+  }
+}
+window.addEventListener('DOMContentLoaded',function(){
+  if(sessionStorage.getItem('ccts_auth')==='1'){
+    document.getElementById('login-overlay').style.display='none';
+  }
+});
+</script>
+
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-logo">CC</div>
+    <div class="brand-text">
+      <h1>CCTS Dashboard</h1>
+      <p>Covered Call Trading System</p>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('overview')"><span class="tab-icon">◈</span>Overview</div>
+    <div class="tab" onclick="showTab('decision')"><span class="tab-icon">⊕</span>Decision Engine</div>
+    <div class="tab" onclick="showTab('positionmgr')"><span class="tab-icon">⊞</span>Position Manager</div>
+    <div class="tab" onclick="showTab('portfolio')"><span class="tab-icon">◎</span>Portfolio</div>
+  </div>
+  <div class="topbar-right">
+    <span class="update-label" id="top-date">۱۴۰۵/۰۳/۱۸</span>
+    <!-- LIVE STATUS BADGE — برای آینده: وقتی data feed متصل شد، این badge تغییر می‌کند -->
+    <div class="live-badge live-disconnected" id="live-status-badge">
+      <div class="live-dot"></div>
+      <span id="live-status-text">ورودی دستی</span>
+    </div>
+    <!-- THEME TOGGLE -->
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">
+      <span class="theme-icon" id="theme-icon">☀</span>
+      <span id="theme-label">روز</span>
+    </button>
+  </div>
+</div>
+
+<!-- CHART TOOLTIP -->
+<div id="chart-tooltip">
+  <div class="tt-date" id="tt-date">—</div>
+  <div class="tt-row"><span class="tt-lbl">ارزش واقعی (ریال)</span><span class="tt-val" id="tt-act">—</span></div>
+  <div class="tt-row"><span class="tt-lbl">Required Value (ریال)</span><span class="tt-val" id="tt-req">—</span></div>
+  <div class="tt-row"><span class="tt-lbl">سود از سرمایه اولیه</span><span class="tt-val" id="tt-ret">—</span></div>
+  <div class="tt-row"><span class="tt-lbl">بازدهی سالانه‌شده</span><span class="tt-val" id="tt-ann">—</span></div>
+</div>
+
+<!-- DATA SOURCE BANNER — نشان‌دهنده منبع داده -->
+<div class="data-source-banner">
+  <span class="ds-label">منبع داده:</span>
+  <span class="ds-manual" id="ds-mode-label">📝 ورودی دستی — برای اتصال live، تابع connectLiveFeed() را پیاده‌سازی کنید</span>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 1 · OVERVIEW
+══════════════════════════════════════════════════ -->
+<div class="page active" id="page-overview">
+
+  <!-- Quick price input — این section در آینده با live feed جایگزین می‌شود -->
+  <div class="inp-section">
+    <div class="inp-title">
+      ⚡ قیمت‌های روز
+      <span style="font-size:10px;color:var(--text3);font-weight:400">
+        — در آینده: این مقادیر از API بازار به‌صورت خودکار دریافت می‌شوند
+      </span>
+    </div>
+    <div class="inp-row">
+      <div class="inp-grp">
+        <label>قیمت GoldBar <span id="gb-live-tag" style="display:none" class="badge badge-live" style="font-size:9px">live</span></label>
+        <input class="inp" id="ov-gold" value="24043673" oninput="refreshAll()">
+      </div>
+      <div class="inp-grp">
+        <label>GBMO05C1600 <span id="c1600-live-tag" style="display:none" class="badge badge-live" style="font-size:9px">live</span></label>
+        <input class="inp" id="ov-c1600" value="9610319" oninput="refreshAll()">
+      </div>
+      <div class="inp-grp">
+        <label>GBMO05C1800 <span id="c1800-live-tag" style="display:none" class="badge badge-live" style="font-size:9px">live</span></label>
+        <input class="inp" id="ov-c1800" value="8500000" oninput="refreshAll()">
+      </div>
+      <div class="inp-grp">
+        <label>تاریخ (شمسی)</label>
+        <input class="inp" id="ov-date" value="1405/03/18" oninput="onDateChange()">
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="g4 gap">
+    <div class="kpi g">
+      <div class="kpi-lbl">ارزش کل پرتفو</div>
+      <div class="kpi-val g" id="kpi-total">—</div>
+      <div class="kpi-sub"><span class="kpi-unit">ریال</span></div>
+    </div>
+    <div class="kpi" id="kpi-pnl-card">
+      <div class="kpi-lbl">سود / زیان کل</div>
+      <div class="kpi-val" id="kpi-pnl">—</div>
+      <div class="kpi-sub" id="kpi-pnl-pct">—</div>
+    </div>
+    <div class="kpi bl">
+      <div class="kpi-lbl">بازدهی سالانه‌شده</div>
+      <div class="kpi-val bl" id="kpi-annual">—</div>
+      <div class="kpi-sub" id="kpi-day-sub">—</div>
+    </div>
+    <div class="kpi g">
+      <div class="kpi-lbl">وجه نقد آزاد</div>
+      <div class="kpi-val g" id="kpi-cash">—</div>
+      <div class="kpi-sub">
+        <span class="kpi-unit">ریال</span> &nbsp;·&nbsp;
+        نسبت نقد: <span id="kpi-cash-ratio" style="font-weight:700;color:var(--gold)">—</span>
+      </div>
+    </div>
+  </div>
+  <!-- Chart + Expiry + Stats -->
+  <div class="g3 gap" style="grid-template-columns:2fr 1fr 1fr">
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-title">عملکرد پرتفو</span>
+        <span class="card-note">ارزش واقعی vs Required vs اعمال</span>
+      </div>
+      <div style="position:relative" id="chart-wrap"><canvas id="ov-chart" height="210"></canvas></div>
+      <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--text2)">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:3px;background:var(--gold);display:inline-block;border-radius:2px"></span>ارزش واقعی</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:3px;background:rgba(100,120,160,.7);display:inline-block;border-radius:2px;border-top:1px dashed rgba(100,120,160,.8)"></span>Required</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:3px;background:#9b59b6;display:inline-block;border-radius:2px;border-top:2px dotted #9b59b6"></span>اعمال پرتفو</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="card-title">سررسید</span></div>
+      <div style="text-align:center;padding:8px 0">
+        <div class="expiry-big" id="ov-dte">—</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px">روز تا انقضا</div>
+        <div style="font-size:14px;font-weight:600;margin-top:6px" id="ov-expiry-date">۱۴۰۵/۰۵/۲۷</div>
+        <div class="expiry-prog"><div class="expiry-prog-fill" id="ov-dte-bar" style="width:0%"></div></div>
+      </div>
+      <div class="div"></div>
+      <div class="srow"><span class="srow-lbl">شروع</span><span class="srow-val">۱۴۰۵/۰۲/۲۱</span></div>
+      <div class="srow"><span class="srow-lbl">کل دوره</span><span class="srow-val" id="ov-total-days">—</span></div>
+      <div class="srow"><span class="srow-lbl">سپری‌شده</span><span class="srow-val" id="ov-elapsed">—</span></div>
+    </div>
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-title">Required vs Actual</span>
+        <span class="card-note" id="rear-display">نرخ: ۳۸.۵٪</span>
+      </div>
+      <div class="srow"><span class="srow-lbl">Required Value</span><span class="srow-val" style="color:var(--text2);font-size:12px" id="ov-req">—</span></div>
+      <div class="srow"><span class="srow-lbl">ارزش واقعی</span><span class="srow-val gold" style="font-size:12px" id="ov-act">—</span></div>
+      <div class="srow"><span class="srow-lbl">انحراف</span><span class="srow-val" style="font-size:12px" id="ov-dev">—</span></div>
+      <div class="div"></div>
+      <div class="srow">
+        <span class="srow-lbl">حداقل سود لازم</span>
+        <span class="srow-val warn" style="font-size:12px" id="ov-min-profit">—</span>
+      </div>
+      <div class="srow"><span class="srow-lbl">سود/زیان تا الان</span><span class="srow-val" style="font-size:12px" id="ov-pnl2">—</span></div>
+      <div class="srow">
+        <span class="srow-lbl">نرخ سالانه لازم</span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <input class="inp" id="inp-rear" value="0.385" style="width:70px;padding:4px 8px;font-size:12px" oninput="refreshAll()">
+          <span style="font-size:11px;color:var(--text3)">= <span id="rear-pct-lbl">۳۸.۵٪</span></span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open positions quick view -->
+  <div class="sec">پوزیشن‌های باز</div>
+  <div class="card">
+    <div class="tbl-scroll">
+      <table class="tbl"><thead><tr>
+        <th>نماد</th><th>نوع</th><th>تعداد</th><th>قیمت تسویه (ریال)</th><th>ارزش بازار (ریال)</th><th>Strike (ریال)</th><th>ITM/OTM %</th><th>PV</th><th>آفست بهینه؟</th>
+      </tr></thead>
+      <tbody id="ov-pos-body"></tbody>
+      <tfoot id="ov-pos-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- ══════════════════════════════════════════════════
+     TAB 2 · DECISION ENGINE
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-decision">
+
+  <div class="inp-section">
+    <div class="inp-title">📊 پارامترهای ورودی — Decision Engine</div>
+    <div class="inp-row">
+      <div class="inp-grp"><label>قیمت شمش طلا (Spot)</label><input class="inp" id="de-spot" value="24043673" oninput="calcDecision()"></div>
+      <div class="inp-grp"><label>نوسان‌پذیری (RefVol σ)</label><input class="inp" id="de-vol" value="0.5194" oninput="calcDecision()"></div>
+      <div class="inp-grp"><label>نرخ بهره بدون ریسک (r)</label><input class="inp" id="de-rf" value="0.40" oninput="calcDecision()"></div>
+      <div class="inp-grp"><label>حداقل پوشش ریسک (MSP)</label><input class="inp" id="de-msp" value="-0.20" oninput="calcDecision()"></div>
+      <div class="inp-grp"><label>حداقل بازدهی سالانه (REAR)</label><input class="inp" id="de-rear" value="0.385" oninput="calcDecision()"></div>
+      <div class="inp-grp"><label>BEAR (Benchmark)</label><input class="inp" id="de-bear" value="0.45" oninput="calcDecision()"></div>
+    </div>
+    <div class="inp-row" style="margin-top:10px;align-items:center">
+      <div class="inp-grp">
+        <label>مبنای پرمیوم برای محاسبات</label>
+        <div class="prem-toggle">
+          <button class="prem-toggle-btn active" onclick="setPremBasis('min')" id="pbtn-min">Min Acceptable</button>
+          <button class="prem-toggle-btn" onclick="setPremBasis('user')" id="pbtn-user">قیمت بازار</button>
+        </div>
+      </div>
+      <div class="inp-grp" id="user-prem-note" style="display:none">
+        <label style="color:var(--warn)">⚠ قیمت بازار را در ستون قیمت بازار هر ردیف وارد کنید</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="g5 gap">
+    <div class="kpi g"><div class="kpi-lbl">Expected Move</div><div class="kpi-val g" id="de-em">—</div><div class="kpi-sub" id="de-em-pct">—</div></div>
+    <div class="kpi bl"><div class="kpi-lbl">Min Strike (حداقل پوشش)</div><div class="kpi-val bl" id="de-minstrike">—</div><div class="kpi-sub">MSP = <span id="de-msp-display">—</span></div></div>
+    <div class="kpi g"><div class="kpi-lbl">Spot + EM (بالا)</div><div class="kpi-val g" id="de-spot-em-up">—</div><div class="kpi-sub">محدوده حرکت بالا</div></div>
+    <div class="kpi"><div class="kpi-lbl">Spot − EM (پایین)</div><div class="kpi-val" id="de-spot-em-dn" style="color:var(--text2)">—</div><div class="kpi-sub">محدوده حرکت پایین</div></div>
+    <div class="kpi pu"><div class="kpi-lbl">DTE (نزدیک‌ترین سررسید)</div><div class="kpi-val pu" id="de-dte-sel">—</div><div class="kpi-sub">روز</div></div>
+  </div>
+
+  <!-- زنجیره گروه‌بندی‌شده بر اساس سررسید — توسط calcDecision() پر می‌شود -->
+  <div id="de-chain-groups"></div>
+</div><!-- ══════════════════════════════════════════════════
+     TAB 3 · POSITION MANAGER
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-positionmgr">
+
+  <div class="inp-section">
+    <div class="inp-title">🎯 ورود قیمت‌های جاری برای محاسبه PV</div>
+    <div class="inp-row">
+      <div class="inp-grp"><label>قیمت GoldBar امروز</label><input class="inp" id="pm-spot" value="24043673" oninput="calcPM()"></div>
+      <div class="inp-grp"><label>قیمت GBMO05C1600 امروز</label><input class="inp" id="pm-c1600" value="9610319" oninput="calcPM()"></div>
+      <div class="inp-grp"><label>قیمت GBMO05C1800 امروز</label><input class="inp" id="pm-c1800" value="8500000" oninput="calcPM()"></div>
+      <div class="inp-grp">
+        <label>تاریخ جاری (شمسی)</label>
+        <input class="inp" id="pm-date" value="1405/03/18" oninput="calcPM()" readonly style="background:var(--s2);cursor:default">
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">وضعیت پوزیشن‌ها · منطق PV (Profit Velocity)</div>
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--text2)">
+    <strong style="color:var(--gold)">منطق PV:</strong>
+    سود خطی هدف تا روز T = Max_Profit × (DaysElapsed / TotalDTE) · سود واقعی = سود underlying + سود کال (پرمیوم اولیه − قیمت آفست امروز) · <strong style="color:var(--green)">PV = سود واقعی ÷ سود خطی هدف · اگر PV > 2 → آفست بهینه است</strong>
+    <br><span style="color:var(--text3);font-size:11px;margin-top:4px;display:block">⚙️ DaysElapsed به‌صورت خودکار از تاریخ ورود تا تاریخ جاری (ورودی بالا) محاسبه می‌شود.</span>
+  </div>
+
+  <div id="pm-cards-container" class="gap"></div>
+
+  <div class="sec">جدول خلاصه Position Manager</div>
+  <div class="card">
+    <div class="tbl-scroll">
+      <table class="tbl">
+        <thead><tr>
+          <th>نماد</th><th>تاریخ ورود</th><th>حجم</th><th>Strike</th><th>DTE ورود</th>
+          <th>پرمیوم دریافتی/contract</th><th>Max Profit/contract</th><th>سود خطی هدف</th>
+          <th>سود Underlying</th><th>سود کال (آفست)</th><th>سود کل واقعی</th>
+          <th>PV</th><th>آفست بهینه؟</th>
+        </tr></thead>
+        <tbody id="pm-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 4 · PORTFOLIO
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-portfolio">
+
+  <div class="sec">خلاصه پرتفو</div>
+  <div class="g4 gap">
+    <div class="kpi g">
+      <div class="kpi-lbl">سرمایه اولیه</div>
+      <div class="kpi-val g" id="pf-init-cap">۵۰٬۰۰۰٬۰۰۰٬۰۰۰</div>
+      <div class="kpi-sub"><span class="kpi-unit">ریال</span></div>
+    </div>
+    <div class="kpi gr">
+      <div class="kpi-lbl">پرمیوم جمع‌شده (خالص)</div>
+      <div class="kpi-val gr">+۲۸٬۵۲۱٬۷۱۸٬۲۵۱</div>
+      <div class="kpi-sub"><span class="kpi-unit">ریال</span></div>
+    </div>
+    <div class="kpi re">
+      <div class="kpi-lbl">خالص ارزش دارایی پایه</div>
+      <div class="kpi-val re">−۷۲٬۱۰۶٬۹۵۶٬۲۹۶</div>
+      <div class="kpi-sub"><span class="kpi-unit">ریال</span></div>
+    </div>
+    <div class="kpi" id="pf-pnl-kpi">
+      <div class="kpi-lbl">P&L خالص</div>
+      <div class="kpi-val" id="pf-pnl-val" style="color:var(--red)">—</div>
+      <div class="kpi-sub" id="pf-pnl-sub">—</div>
+    </div>
+  </div>
+
+  <div class="g3 gap">
+    <div class="card">
+      <div class="card-hd"><span class="card-title">سود/زیان کال‌ها (Realized)</span></div>
+      <div class="srow"><span class="srow-lbl">GBMO05C1600 offset</span><span class="srow-val pos">+۷۲۰٬۳۴۸٬۶۵۶</span></div>
+      <div class="srow"><span class="srow-lbl">GBMO05C1800 offset</span><span class="srow-val pos">+۶۴٬۴۸۸٬۵۵۶</span></div>
+      <div class="srow"><span class="srow-lbl">GBAB05C1800 offset</span><span class="srow-val pos">+۶۸٬۳۶۴٬۱۰۰</span></div>
+      <div class="div"></div>
+      <div class="srow"><span class="srow-lbl" style="font-weight:600;color:var(--text)">جمع سود کال</span><span class="srow-val pos">+۸۵۳٬۲۰۱٬۳۱۲</span></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="card-title">سود/زیان شمش</span></div>
+      <div class="srow"><span class="srow-lbl">فروش آفست شمش</span><span class="srow-val neg">−۵۱۴٬۱۸۳٬۷۵۰</span></div>
+      <div class="srow"><span class="srow-lbl">هزینه انبارداری</span><span class="srow-val neg">−۱٬۲۰۸٬۲۹۸٬۳۶۹</span></div>
+      <div class="srow"><span class="srow-lbl">خسارت بیمه</span><span class="srow-val neg">−۵۲۸٬۲۴۴٬۷۴۷</span></div>
+      <div class="div"></div>
+      <div class="srow"><span class="srow-lbl" style="font-weight:600;color:var(--text)">جمع سود/زیان شمش</span><span class="srow-val neg">−۲٬۲۵۰٬۷۲۶٬۸۶۶</span></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="card-title">ریسک پرتفو</span></div>
+      <div class="srow"><span class="srow-lbl">تعداد شمش long</span><span class="srow-val pos">+۲٬۷۹۴</span></div>
+      <div class="srow"><span class="srow-lbl">کال short (C1600)</span><span class="srow-val neg">−۶۵۴</span></div>
+      <div class="srow"><span class="srow-lbl">کال short (C1800)</span><span class="srow-val neg">−۲٬۱۴۰</span></div>
+      <div class="div"></div>
+      <div class="srow"><span class="srow-lbl">Coverage ratio</span><span class="srow-val warn">۱۰۰٪ (fully covered)</span></div>
+      <div class="srow"><span class="srow-lbl">Max downside risk</span><span class="srow-val neg">قیمت شمش &lt; ۱۵.۶ م</span></div>
+    </div>
+  </div>
+
+  <div class="sec">جدول سناریو — P&L پوزیشن کاوردکال</div>
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title">Payoff Table (C1600 · نمونه)</span>
+      <span class="card-note">قیمت ورود شمش: ~۲۵٬۷۲۰٬۰۰۰ · Strike: ۱۶٬۰۰۰٬۰۰۰</span>
+    </div>
+    <div class="tbl-scroll" style="max-height:320px;overflow-y:auto">
+      <table class="tbl" id="pf-scenario-table">
+        <thead><tr><th>% تغییر قیمت</th><th>قیمت سناریو (ریال)</th><th>Intrinsic Value</th><th>P&L Covered Call</th></tr></thead>
+        <tbody id="pf-scenario-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">تاریخچه معاملات</div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title">Trade Log</span><span class="card-note" id="trade-count-badge">— ردیف</span></div>
+    <div class="tbl-scroll" style="max-height:380px;overflow-y:auto">
+      <table class="tbl">
+        <thead><tr><th>تاریخ</th><th>نماد</th><th>نوع</th><th>تعداد</th><th>ارزش معامله (ریال)</th><th>کارمزد (ریال)</th><th>مجموع (ریال)</th><th>سود کال (ریال)</th><th>یادداشت</th></tr></thead>
+        <tbody id="pf-trade-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║                    ===== DATA_START =====                       ║
+// ║  این بلوک را برای آپدیت داده‌ها جایگزین کنید.                  ║
+// ║  راهنمای آپدیت: README_UPDATE.md                               ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
+const DASHBOARD_DATA = {
+
+  // ── META ──────────────────────────────────────────────────────────
+  // منبع: دستی / تاریخ آخرین آپدیت
+  lastUpdated: '1405/03/18',
+  dataUnit: 'IRR', // واحد: ریال ایران — تمام مقادیر مالی به ریال
+
+  // ── PORTFOLIO CONSTANTS ───────────────────────────────────────────
+  // منبع: Excel > Sheet: Value > ردیف اول (1405/02/21)
+  initialCapital: 50000000000,       // سرمایه اولیه (ریال)
+  cashBalance: 6414761955.64,        // وجه نقد آزاد — آخرین ردیف Sheet:Value ستون خالص وجه نقد
+  requiredAnnualRate: 0.385,         // نرخ سالانه لازم (REAR) — Sheet: Return ردیف "معادل سالیانه"
+
+  // ── PORTFOLIO START & EXPIRY ──────────────────────────────────────
+  // منبع: Sheet:Value ردیف اول / سررسید قرارداد
+  portfolioStartDate: '1405/02/21',  // تاریخ شروع پرتفو
+  optionExpiryDate:   '1405/05/27',  // سررسید قرارداد GBMO05
+
+  // ── OPEN POSITIONS ────────────────────────────────────────────────
+  // منبع: Sheet:Value آخرین ردیف — تعداد تجمعی هر دارایی
+  openPositions: {
+    goldBar:    { qty: 2794,  type: 'long' },   // GoldBar long
+    GBMO05C1600:{ qty: -654,  type: 'short', strike: 16000000 },
+    GBMO05C1800:{ qty: -2140, type: 'short', strike: 18000000 },
+  },
+
+  // ── RETURN HISTORY ────────────────────────────────────────────────
+  // منبع: Sheet:Return ستون‌های تاریخ، Required Portfolio Value، Actual Value
+  // فرمت: { d: 'نمایش', day: روز_از_ابتدا, req: ریال, act: ریال }
+  // NOTE: Required از فرمول compound شده در Excel است — همان فرمول در کد نیز پیاده شده
+  returnHistory: [
+    {d:'۰۲/۲۱',day:0, req:50000000000,    act:50000000000},
+    {d:'۰۲/۲۲',day:1, req:50044636369,    act:49997663400},
+    {d:'۰۲/۲۳',day:2, req:50089312587,    act:50029375336},
+    {d:'۰۲/۲۶',day:5, req:50223580685,    act:50025066357},
+    {d:'۰۲/۲۷',day:6, req:50268416651,    act:49192269322},
+    {d:'۰۲/۲۸',day:7, req:50313292644,    act:49744596822},
+    {d:'۰۲/۲۹',day:8, req:50358208698,    act:49631774172},
+    {d:'۰۲/۳۰',day:9, req:50403164851,    act:49841202284},
+    {d:'۰۳/۰۲',day:12,req:50538274253,    act:50089008622},
+    {d:'۰۳/۰۳',day:13,req:50583391155,    act:48065138230},
+    {d:'۰۳/۰۴',day:14,req:50628548334,    act:48932636504},
+    {d:'۰۳/۰۵',day:15,req:50673745826,    act:52498994927},
+    {d:'۰۳/۰۹',day:19,req:50854939645,    act:51831343363},
+    {d:'۰۳/۱۰',day:20,req:50900339242,    act:50972547601},
+    {d:'۰۳/۱۱',day:21,req:50945779369,    act:50316784307},
+    {d:'۰۳/۱۲',day:22,req:50991260062,    act:50286041845},
+    {d:'۰۳/۱۳',day:23,req:51036781357,    act:50015091983},
+    {d:'۰۳/۱۶',day:26,req:51173589215,    act:50172074565},
+    {d:'۰۳/۱۷',day:27,req:51219273280,    act:46356911829},
+    {d:'۰۳/۱۸',day:28,req:51264998128,    act:49117635691},
+  ],
+
+  // ── POSITION MANAGER ─────────────────────────────────────────────
+  // منبع: Excel > Sheet:TradeLog — هر ردیف یک batch از معامله
+  // daysElapsed: در کد به‌صورت پویا از entryDate تا تاریخ جاری محاسبه می‌شود
+  pmEntries: [
+    {symbol:'GBMO05C1600',entryDate:'1405/02/26',expiry:'1405/05/27',
+     qty:404,strike:16000000,totalDTE:94,
+     costBasisPerContract:26061340.30,premiumPerContract:11709351.97,
+     maxProfitPerContract:1578019.67,ytm:0.4994},
+
+    {symbol:'GBMO05C1600',entryDate:'1405/03/09',expiry:'1405/05/27',
+     qty:250,strike:16000000,totalDTE:80,
+     costBasisPerContract:23807000,premiumPerContract:9188960,
+     maxProfitPerContract:1315720,ytm:0.4817},
+
+    {symbol:'GBMO05C1800',entryDate:'1405/02/22',expiry:'1405/05/27',
+     qty:200,strike:18000000,totalDTE:98,
+     costBasisPerContract:26791646,premiumPerContract:10986800,
+     maxProfitPerContract:2118490,ytm:0.5976},
+
+    {symbol:'GBMO05C1800',entryDate:'1405/02/23',expiry:'1405/05/27',
+     qty:800,strike:18000000,totalDTE:97,
+     costBasisPerContract:26332082.80,premiumPerContract:10232827.80,
+     maxProfitPerContract:1824349.01,ytm:0.4977},
+
+    {symbol:'GBMO05C1800',entryDate:'1405/02/26',expiry:'1405/05/27',
+     qty:100,strike:18000000,totalDTE:94,
+     costBasisPerContract:26061340.30,premiumPerContract:9888120,
+     maxProfitPerContract:1751187.70,ytm:0.4906},
+
+    {symbol:'GBMO05C1800',entryDate:'1405/02/27',expiry:'1405/05/27',
+     qty:40,strike:18000000,totalDTE:93,
+     costBasisPerContract:25881998.03,premiumPerContract:10487400,
+     maxProfitPerContract:2530077.98,ytm:0.8170},
+
+    {symbol:'GBMO05C1800',entryDate:'1405/02/29',expiry:'1405/05/27',
+     qty:400,strike:18000000,totalDTE:91,
+     costBasisPerContract:25446480.89,premiumPerContract:9288840,
+     maxProfitPerContract:1767571.11,ytm:0.5165},
+
+    {symbol:'GBMO05C1800',entryDate:'1405/02/30',expiry:'1405/05/27',
+     qty:150,strike:18000000,totalDTE:90,
+     costBasisPerContract:25657937.85,premiumPerContract:9488600,
+     maxProfitPerContract:1756142.15,ytm:0.5192},
+
+    {symbol:'GBMO05C1800',entryDate:'1405/03/04',expiry:'1405/05/27',
+     qty:300,strike:18000000,totalDTE:85,
+     costBasisPerContract:24763172.82,premiumPerContract:8689560.99,
+     maxProfitPerContract:1853208.18,ytm:0.5977},
+
+    {symbol:'GBMO05C1800',entryDate:'1405/03/10',expiry:'1405/05/27',
+     qty:150,strike:18000000,totalDTE:79,
+     costBasisPerContract:23937312,premiumPerContract:7351168,
+     maxProfitPerContract:1342284,ytm:0.4327},
+  ],
+
+  // ── OPTION CHAIN ─────────────────────────────────────────────────
+  // منبع: Decision Engine — زنجیره آپشن‌های موجود در بازار
+  gbChain: [
+    {sym:'GBMO05C1600',expiry:'1405/05/27',strike:16000000,strikeDist:-0.333,intrinsic:8000000},
+    {sym:'GBMO05C1800',expiry:'1405/05/27',strike:18000000,strikeDist:-0.25, intrinsic:6000000},
+    {sym:'GBMO05C2000',expiry:'1405/05/27',strike:20000000,strikeDist:-0.167,intrinsic:4000000},
+    {sym:'GBMO05C2200',expiry:'1405/05/27',strike:22000000,strikeDist:-0.083,intrinsic:2000000},
+    {sym:'GBMO05C2400',expiry:'1405/05/27',strike:24000000,strikeDist:0,     intrinsic:0},
+    {sym:'GBMO05C2600',expiry:'1405/05/27',strike:26000000,strikeDist:0.083, intrinsic:0},
+    {sym:'GBMO05C2800',expiry:'1405/05/27',strike:28000000,strikeDist:0.167, intrinsic:0},
+    {sym:'GBMO05C3000',expiry:'1405/05/27',strike:30000000,strikeDist:0.25,  intrinsic:0},
+    {sym:'GBAB05C1800',expiry:'1405/08/19',strike:18000000,strikeDist:-0.25, intrinsic:6000000},
+    {sym:'GBAB05C2000',expiry:'1405/08/19',strike:20000000,strikeDist:-0.167,intrinsic:4000000},
+    {sym:'GBAB05C2200',expiry:'1405/08/19',strike:22000000,strikeDist:-0.083,intrinsic:2000000},
+    {sym:'GBAB05C2400',expiry:'1405/08/19',strike:24000000,strikeDist:0,     intrinsic:0},
+    {sym:'GBAB05C2600',expiry:'1405/08/19',strike:26000000,strikeDist:0.083, intrinsic:0},
+    {sym:'GBAB05C2800',expiry:'1405/08/19',strike:28000000,strikeDist:0.167, intrinsic:0},
+    {sym:'GBAB05C3000',expiry:'1405/08/19',strike:30000000,strikeDist:0.25,  intrinsic:0},
+    {sym:'GBBA05C1800',expiry:'1405/11/27',strike:18000000,strikeDist:-0.25, intrinsic:6000000},
+    {sym:'GBBA05C2200',expiry:'1405/11/27',strike:22000000,strikeDist:-0.083,intrinsic:2000000},
+    {sym:'GBBA05C2600',expiry:'1405/11/27',strike:26000000,strikeDist:0.083, intrinsic:0},
+    {sym:'GBBA05C3000',expiry:'1405/11/27',strike:30000000,strikeDist:0.25,  intrinsic:0},
+    {sym:'GBBA05C3200',expiry:'1405/11/27',strike:32000000,strikeDist:0.333, intrinsic:0},
+  ],
+
+  // ── SCENARIO TABLE ────────────────────────────────────────────────
+  // منبع: Excel > Sheet:Portfolio — جدول سناریو C1600
+  // [%تغییر, قیمت سناریو, Intrinsic, P&L Covered Call]
+  scenario: [
+    [-0.50,11899189,0,-3772798],[-0.45,13089108,0,-2582879],[-0.40,14279027,0,-1392960],
+    [-0.35,15468946,0,-203041],[-0.34,15706929,0,34942],[-0.30,16658865,0,986878],
+    [-0.26,17610800,179221,1759592],[-0.25,17848784,417205,1759592],[-0.20,18800719,1369140,1759592],
+    [-0.15,19752654,2321075,1759592],[0,23798378,6363703,1759592],[0.10,26178216,8743541,1759592],
+  ],
+
+  // ── TRADE LOG ─────────────────────────────────────────────────────
+  // منبع: Excel > Sheet:TradeLog — تمام ردیف‌ها
+  trades: [
+    {d:'۱۴۰۵/۰۲/۲۲',n:'GoldBar',       t:'خرید',       q:200,   v:-5345500000,  f:-12829200,  tot:-5358329200,  pnl:null,       note:'هزینه انبارداری شناسایی شد'},
+    {d:'۱۴۰۵/۰۲/۲۲',n:'GBMO05C1800',   t:'فروش',       q:-200,  v:2200000000,   f:-2640000,   tot:2197360000,   pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۳',n:'GoldBar',       t:'خرید',       q:860,   v:-22591371940, f:-54219264,  tot:-22645591204, pnl:null,       note:'هزینه انبارداری ۱۲۳ گواهی شمش'},
+    {d:'۱۴۰۵/۰۲/۲۳',n:'GBMO05C1600',   t:'فروش',       q:-12,   v:147600000,    f:-177120,    tot:147422880,    pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۳',n:'GBMO05C1800',   t:'فروش',       q:-820,  v:8401000000,   f:-10081200,  tot:8390918800,   pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۳',n:'GBAB05C1800',   t:'فروش',       q:-28,   v:363000000,    f:-435600,    tot:362564400,    pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۶',n:'GoldBar',       t:'خرید',       q:638,   v:-16587325540, f:-39809571,  tot:-16627135111, pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۶',n:'GBMO05C1600',   t:'فروش',       q:-538,  v:6307200000,   f:-7568640,   tot:6299631360,   pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۶',n:'GBMO05C1800',   t:'فروش',       q:-100,  v:990000000,    f:-1188000,   tot:988812000,    pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۷',n:'GoldBar',       t:'خرید',       q:40,    v:-1032801200,  f:-2478721,   tot:-1035279921,  pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۷',n:'GBMO05C1600',   t:'فروش',       q:-13,   v:158600000,    f:-190320,    tot:158409680,    pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۷',n:'GBMO05C1800',   t:'فروش',       q:-40,   v:420000000,    f:-504000,    tot:419496000,    pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۷',n:'GBMO05C1600',   t:'خرید-آفست', q:13,    v:-151680984,   f:-182016,    tot:-151863000,   pnl:6546680,    note:null},
+    {d:'۱۴۰۵/۰۲/۲۸',n:'GoldBar',       t:'فروش-آفست', q:-12,   v:302400000,    f:-725760,    tot:301651728,    pnl:-14333265,  note:null},
+    {d:'۱۴۰۵/۰۲/۲۸',n:'GBMO05C1600',   t:'فروش',       q:-6,    v:72145386,     f:-86574,     tot:72058812,     pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۸',n:'GBAB05C1800',   t:'خرید-آفست', q:28,    v:-301560028,   f:-361872,    tot:-301921900,   pnl:60642500,   note:null},
+    {d:'۱۴۰۵/۰۲/۲۸',n:'GBAB05C1800',   t:'فروش',       q:-10,   v:120000000,    f:-144000,    tot:119856000,    pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۸',n:'—',             t:'هزینه انبارداری',q:null,v:null,       f:null,       tot:0,            pnl:null,       note:'هزینه انبارداری کل گواهی سپرده‌ها — ۹۴۲٬۲۶۳٬۵۶۴'},
+    {d:'۱۴۰۵/۰۲/۲۹',n:'—',             t:'هزینه انبارداری',q:null,v:null,       f:null,       tot:null,         pnl:null,       note:'هزینه انبارداری کل — ۱۱٬۲۴۹٬۵۶۸'},
+    {d:'۱۴۰۵/۰۲/۲۹',n:'GoldBar',       t:'خرید',       q:450,   v:-11423500000, f:-27416400,  tot:-11450916400, pnl:null,       note:'خسارت بیمه ۱۴۳٬۵۳۰٬۰۰۰٬۰۰۰'},
+    {d:'۱۴۰۵/۰۲/۲۹',n:'GBMO05C1800',   t:'فروش',       q:-400,  v:3720000000,   f:-4464000,   tot:3715536000,   pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۹',n:'GBMO05C1600',   t:'فروش',       q:-100,  v:1175000000,   f:-1410000,   tot:1173590000,   pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۲۹',n:'GBMO05C1600',   t:'خرید-آفست', q:40,    v:-440500000,   f:-528600,    tot:-441028600,   pnl:28407400,   note:null},
+    {d:'۱۴۰۵/۰۲/۲۹',n:'GBAB05C1800',   t:'خرید-آفست', q:10,    v:-112000000,   f:-134400,    tot:-112134400,   pnl:7721600,    note:null},
+    {d:'۱۴۰۵/۰۲/۳۰',n:'GoldBar',       t:'خرید',       q:160,   v:-4095441000,  f:-9829056,   tot:-4105270056,  pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۳۰',n:'GBMO05C1600',   t:'فروش',       q:-10,   v:117800000,    f:-141360,    tot:117658640,    pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۲/۳۰',n:'GBMO05C1800',   t:'فروش',       q:-150,  v:1425000000,   f:-1710000,   tot:1423290000,   pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۳/۰۲',n:'GoldBar',       t:'فروش-آفست', q:-60,   v:1496160000,   f:-3590784,   tot:1492376256,   pnl:-43268616,  note:null},
+    {d:'۱۴۰۵/۰۳/۰۲',n:'GoldBar',       t:'خرید',       q:60,    v:-1502394180,  f:-3605744,   tot:-1505999924,  pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۳/۰۲',n:'GBMO05C1600',   t:'خرید-آفست', q:60,    v:-612000000,   f:-734400,    tot:-612734400,   pnl:91419600,   note:null},
+    {d:'۱۴۰۵/۰۳/۰۲',n:'GBMO05C1600',   t:'فروش',       q:-60,   v:677000000,    f:-812400,    tot:676187600,    pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۳/۰۴',n:'GoldBar',       t:'خرید',       q:309,   v:-7633500000,  f:-18320400,  tot:-7651820400,  pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۳/۰۴',n:'GBMO05C1600',   t:'فروش',       q:-9,    v:93600000,     f:-112320,    tot:93487680,     pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۳/۰۴',n:'GBMO05C1800',   t:'فروش',       q:-300,  v:2610000300,   f:-3132000,   tot:2606868299,   pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۳/۰۵',n:'GoldBar',       t:'فروش-آفست', q:-251,  v:6037170000,   f:-14489208,  tot:6021704736,   pnl:-456581868, note:null},
+    {d:'۱۴۰۵/۰۳/۰۵',n:'GBMO05C1600',   t:'خرید-آفست', q:231,   v:-2079000000,  f:-2494800,   tot:-2081494800,  pnl:594373976,  note:null},
+    {d:'۱۴۰۵/۰۳/۰۵',n:'GBMO05C1800',   t:'خرید-آفست', q:20,    v:-140000000,   f:-168000,    tot:-140168000,   pnl:64488556,   note:null},
+    {d:'۱۴۰۵/۰۳/۰۵',n:'—',             t:'هزینه انبارداری',q:null,v:null,       f:null,       tot:null,         pnl:null,       note:'هزینه انبارداری کل — ۱۷۶٬۷۸۴٬۳۷۵'},
+    {d:'۱۴۰۵/۰۳/۰۹',n:'GoldBar',       t:'خرید',       q:250,   v:-5937500000,  f:-14250000,  tot:-5951750000,  pnl:null,       note:'خسارت بیمه ۳۸۴٬۷۱۰٬۰۰۰٬۰۰۰ — هزینه انبارداری ۷۸٬۲۶۰٬۲۶۲'},
+    {d:'۱۴۰۵/۰۳/۰۹',n:'GBMO05C1600',   t:'فروش',       q:-250,  v:2300000000,   f:-2760000,   tot:2297240000,   pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۳/۱۰',n:'GoldBar',       t:'خرید',       q:150,   v:-3582000000,  f:-8596800,   tot:-3590596800,  pnl:null,       note:null},
+    {d:'۱۴۰۵/۰۳/۱۰',n:'GBMO05C1800',   t:'فروش',       q:-150,  v:1104000000,   f:-1324800,   tot:1102675200,   pnl:null,       note:null},
+  ],
+};
+
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║                     ===== DATA_END =====                        ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
+
+// ══════════════════════════════════════════════════════════════════
+//  JALALI DATE UTILITIES
+//  پیاده‌سازی داخلی — بدون CDN خارجی
+//  ورودی: رشته 'YYYY/MM/DD' یا '۱۴۰۵/۰۳/۱۸' (اعداد فارسی)
+// ══════════════════════════════════════════════════════════════════
+
+const Jalali = (() => {
+  // تبدیل ارقام فارسی/عربی به انگلیسی
+  function toEn(s) {
+    return String(s)
+      .replace(/[۰-۹]/g, d => d.charCodeAt(0) - 1776)
+      .replace(/[٠-٩]/g, d => d.charCodeAt(0) - 1632);
+  }
+
+  // پارس تاریخ شمسی — هر دو فرمت عددی و فارسی
+  function parse(str) {
+    const s = toEn(String(str)).replace(/[\s\-\.]/g, '/');
+    const parts = s.split('/');
+    if (parts.length !== 3) return null;
+    return { y: +parts[0], m: +parts[1], d: +parts[2] };
+  }
+
+  // تعداد روزهای یک ماه شمسی
+  function daysInMonth(y, m) {
+    if (m <= 6) return 31;
+    if (m <= 11) return 30;
+    // اسفند: ۲۹ یا ۳۰ (سال کبیسه)
+    return isLeap(y) ? 30 : 29;
+  }
+
+  // سال کبیسه شمسی (الگوریتم Borkowski)
+  function isLeap(y) {
+    const rem = ((y - (y > 0 ? 474 : 473)) % 2820 + 474 + 38) * 682;
+    return (rem % 2816) < 682;
+  }
+
+  // تبدیل تاریخ شمسی به Julian Day Number
+  function jalaliToJdn(y, m, d) {
+    const ep = 1948320.5;
+    const cy = y - 474;
+    const ry = cy % 2820 + 474;
+    return Math.floor(ep + 365 * cy + Math.floor((682 * ry - 110) / 2816) +
+      (m <= 6 ? 31 * (m - 1) : 30 * (m - 1) + 6) + d + Math.floor(2820 * Math.floor(cy / 2820) * 365.24219879));
+  }
+
+  // اختلاف روزی بین دو تاریخ شمسی
+  function diff(dateStr1, dateStr2) {
+    const a = parse(dateStr1);
+    const b = parse(dateStr2);
+    if (!a || !b) return null;
+    return jalaliToJdn(b.y, b.m, b.d) - jalaliToJdn(a.y, a.m, a.d);
+  }
+
+  // نمایش زیبای تاریخ (با اعداد فارسی)
+  function toDisplay(str) {
+    return toEn(str)  // normalize first
+      .split('/').map(p => String(+p).padStart(2,'0'))
+      .join('/').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  }
+
+  return { parse, diff, daysInMonth, isLeap, toDisplay, toEn };
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+//  LIVE FEED INTERFACE — آماده برای اتصال آینده
+//  برای اتصال API بازار: این توابع را override کنید
+// ══════════════════════════════════════════════════════════════════
+
+const LiveFeed = {
+  _connected: false,
+  _intervalId: null,
+
+  // این تابع را برای اتصال به API بازار پیاده‌سازی کنید
+  // مثال: LiveFeed.connect('https://your-market-api.com', 'YOUR_TOKEN')
+  connect(apiUrl, token) {
+    console.warn('[LiveFeed] پیاده‌سازی اتصال به:', apiUrl);
+    // TODO: WebSocket یا polling از API بازار
+    // وقتی داده دریافت شد: LiveFeed.onData({ goldBar: ..., c1600: ..., c1800: ... })
+  },
+
+  disconnect() {
+    if (this._intervalId) clearInterval(this._intervalId);
+    this._connected = false;
+    this._updateStatusUI(false);
+  },
+
+  // این تابع وقتی داده live دریافت شد فراخوانی می‌شود
+  onData(prices) {
+    // prices = { goldBar: number, c1600: number, c1800: number }
+    if (prices.goldBar)  { document.getElementById('ov-gold').value = prices.goldBar;  document.getElementById('pm-spot').value = prices.goldBar; }
+    if (prices.c1600)    { document.getElementById('ov-c1600').value = prices.c1600;  document.getElementById('pm-c1600').value = prices.c1600; }
+    if (prices.c1800)    { document.getElementById('ov-c1800').value = prices.c1800;  document.getElementById('pm-c1800').value = prices.c1800; }
+    // اعمال استایل "live" روی input ها
+    ['ov-gold','ov-c1600','ov-c1800','pm-spot','pm-c1600','pm-c1800']
+      .forEach(id => document.getElementById(id)?.classList.add('live-override'));
+    refreshAll();
+  },
+
+  _updateStatusUI(connected) {
+    this._connected = connected;
+    const badge = document.getElementById('live-status-badge');
+    const text = document.getElementById('live-status-text');
+    const dsLabel = document.getElementById('ds-mode-label');
+    if (connected) {
+      badge.classList.remove('live-disconnected');
+      badge.classList.add('live-connected');
+      text.textContent = 'Live';
+      dsLabel.className = 'ds-live';
+      dsLabel.textContent = '🟢 اتصال live برقرار است';
+    } else {
+      badge.classList.remove('live-connected');
+      badge.classList.add('live-disconnected');
+      text.textContent = 'ورودی دستی';
+      dsLabel.className = 'ds-manual';
+      dsLabel.textContent = '📝 ورودی دستی — برای اتصال live، تابع LiveFeed.connect() را فراخوانی کنید';
+    }
+  }
+};
+
+
+// ══════════════════════════════════════════════════════════════════
+//  BLACK-SCHOLES, IV, CC PREMIUM CALCULATIONS
+// ══════════════════════════════════════════════════════════════════
+
+function erf(x) {
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const sign=x<0?-1:1; x=Math.abs(x);
+  const t=1/(1+p*x);
+  return sign*(1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x));
+}
+function normCDF(x){ return 0.5*(1+erf(x/Math.sqrt(2))); }
+
+function bsCall(S,K,r,sigma,T){
+  if(T<=0) return {price:Math.max(0,S-K),d1:0,d2:0,delta:S>K?1:0,probTouch:S>K?1:0};
+  const d1=(Math.log(S/K)+(r+0.5*sigma*sigma)*T)/(sigma*Math.sqrt(T));
+  const d2=d1-sigma*Math.sqrt(T);
+  return {price:S*normCDF(d1)-K*Math.exp(-r*T)*normCDF(d2),d1,d2,delta:normCDF(d1),probTouch:2*normCDF(-Math.abs(d1))};
+}
+
+// IV — Newton-Raphson با fallback bisection (بدون CDN)
+function impliedVol(S,K,r,T,marketPrice){
+  if(T<=0||marketPrice<=0) return null;
+  if(marketPrice<Math.max(0,S-K)-0.01) return null;
+  let sigma=0.4;
+  for(let i=0;i<80;i++){
+    sigma=Math.max(sigma,0.001);
+    const bs=bsCall(S,K,r,sigma,T);
+    const diff=bs.price-marketPrice;
+    if(Math.abs(diff)<0.5) return sigma;
+    const vega=S*normCDF(bs.d1)*Math.sqrt(T);
+    if(Math.abs(vega)<1e-8) break;
+    sigma-=diff/vega;
+  }
+  // bisection fallback
+  let lo=0.001,hi=6;
+  for(let i=0;i<60;i++){
+    const mid=(lo+hi)/2;
+    bsCall(S,K,r,mid,T).price<marketPrice?(lo=mid):(hi=mid);
+    if(hi-lo<1e-5) return (lo+hi)/2;
+  }
+  return (lo+hi)/2;
+}
+
+// ── Required/Benchmark Premium (اصلاح‌شده) ──
+// فرمول کاوردکال: P_required = Spot×(1+REAR)^T − Strike
+// کف: max(BS_price, computed) — پرمیوم منفی در بازار ممکن نیست
+// reqRawDisplay: مقدار خام قبل از کف (برای نمایش اطلاعاتی)
+function calcCCPremiums(S,K,r,sigma,dte,rear,bear){
+  const T=dte/365;
+  const bs=bsCall(S,K,r,sigma,T);
+  const intrinsic=Math.max(0,S-K);
+  const reqRaw  =S*Math.pow(1+rear,T)-K;
+  const benchRaw=S*Math.pow(1+bear,T)-K;
+  const reqPrem  =Math.max(bs.price,reqRaw);
+  const benchPrem=Math.max(bs.price,benchRaw);
+  const minAcceptable=Math.max(bs.price,intrinsic);
+  return {bs,intrinsic,reqPrem,benchPrem,reqRawDisplay:reqRaw,minAcceptable};
+}
+
+// Required Value پرتفو — compound سالانه
+function calcRequiredValue(initCap,rear,elapsedDays){
+  return initCap*Math.pow(1+rear,elapsedDays/365);
+}
+
+// Expected Exercise Value
+// پرتفو fully covered: همه short call‌ها اعمال می‌شوند
+// هر pmEntry: qty واحد GoldBar به Strike تحویل + پرمیوم دریافتی
+// GoldBar uncovered (اگر بود) به Spot جاری ارزش‌گذاری می‌شود
+function calcExpectedExerciseValue(spot){
+  const D=DASHBOARD_DATA;
+  let income=D.cashBalance;
+  for(const e of D.pmEntries){
+    income+=e.qty*(e.strike+e.premiumPerContract);
+  }
+  const totalPMqty=D.pmEntries.reduce((s,e)=>s+e.qty,0);
+  const uncovered=D.openPositions.goldBar.qty-totalPMqty;
+  if(uncovered>0) income+=uncovered*spot;
+  return income;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  FORMAT HELPERS
+// ══════════════════════════════════════════════════════════════════
+function Nfull(n){
+  if(n==null||isNaN(n)) return '—';
+  return (n<0?'−':'')+Math.abs(Math.round(n)).toLocaleString('fa-IR');
+}
+function Nsigned(n){
+  if(n==null||isNaN(n)) return '—';
+  return (n>=0?'+':'−')+Math.abs(Math.round(n)).toLocaleString('fa-IR');
+}
+function NP(n) { return n==null?'—':(n*100).toFixed(2)+'٪'; }
+function NP1(n){ return n==null?'—':(n*100).toFixed(1)+'٪'; }
+function NP2(n){ return n==null?'—':(n*100).toFixed(2)+'٪'; }
+function sc(n) { return n>=0?'pos':'neg'; }
+const gI=id=>document.getElementById(id);
+
+// ══════════════════════════════════════════════════════════════════
+//  PREMIUM BASIS STATE (فقط browser state — با refresh پاک می‌شود)
+// ══════════════════════════════════════════════════════════════════
+let _premBasis='min';
+const _userPrices={};
+
+function setPremBasis(mode){
+  _premBasis=mode;
+  gI('pbtn-min').classList.toggle('active',mode==='min');
+  gI('pbtn-user').classList.toggle('active',mode==='user');
+  gI('user-prem-note').style.display=mode==='user'?'flex':'none';
+  calcDecision();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════════════════════════════
+function toggleTheme(){
+  const isLight=document.documentElement.classList.toggle('light');
+  localStorage.setItem('ccts-theme',isLight?'light':'dark');
+  gI('theme-icon').textContent=isLight?'🌙':'☀';
+  gI('theme-label').textContent=isLight?'شب':'روز';
+  drawChart();
+}
+function applyStoredTheme(){
+  if(localStorage.getItem('ccts-theme')==='light'){
+    document.documentElement.classList.add('light');
+    gI('theme-icon').textContent='🌙';
+    gI('theme-label').textContent='شب';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  TAB NAVIGATION
+// ══════════════════════════════════════════════════════════════════
+function showTab(name){
+  const names=['overview','decision','positionmgr','portfolio'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  gI('page-'+name).classList.add('active');
+  if(name==='overview')    refreshAll();
+  if(name==='decision')    calcDecision();
+  if(name==='positionmgr') calcPM();
+  if(name==='portfolio')   renderPortfolio();
+}
+
+function onDateChange(){
+  const v=gI('ov-date').value;
+  gI('top-date').textContent=v;
+  gI('pm-date').value=v;
+  refreshAll();
+  calcPM();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  OVERVIEW — refreshAll
+// ══════════════════════════════════════════════════════════════════
+function refreshAll(){
+  const D=DASHBOARD_DATA;
+  const gold  =+gI('ov-gold').value  ||0;
+  const c1600 =+gI('ov-c1600').value ||0;
+  const c1800 =+gI('ov-c1800').value ||0;
+  const dateStr=gI('ov-date').value;
+
+  gI('pm-spot').value =gold;
+  gI('pm-c1600').value=c1600;
+  gI('pm-c1800').value=c1800;
+
+  const elapsed  =Jalali.diff(D.portfolioStartDate,dateStr)||0;
+  const dte      =Jalali.diff(dateStr,D.optionExpiryDate)||0;
+  const totalDays=Jalali.diff(D.portfolioStartDate,D.optionExpiryDate)||1;
+
+  const pos    =D.openPositions;
+  const totalVal=D.cashBalance+pos.goldBar.qty*gold+pos.GBMO05C1600.qty*c1600+pos.GBMO05C1800.qty*c1800;
+  const pnl    =totalVal-D.initialCapital;
+  const pnlPct =D.initialCapital>0?pnl/D.initialCapital:0;
+  let ann=0;
+  if(elapsed>0&&pnlPct>-1) ann=Math.pow(1+pnlPct,365/elapsed)-1;
+
+  const rear=(+gI('inp-rear').value)||D.requiredAnnualRate;
+  gI('rear-pct-lbl').textContent=NP1(rear);
+  gI('rear-display').textContent='نرخ: '+NP1(rear);
+
+  const reqVal   =calcRequiredValue(D.initialCapital,rear,elapsed);
+  const dev      =totalVal-reqVal;
+  const minProfit=reqVal-D.initialCapital;
+
+  // Free Cash Ratio = وجه نقد / ارزش کل پرتفو
+  const cashRatio=totalVal>0?D.cashBalance/totalVal:0;
+
+  // KPIs
+  gI('kpi-total').textContent=Nfull(totalVal);
+  const pnlEl=gI('kpi-pnl');
+  pnlEl.textContent=(pnl>=0?'▲ +':'▼ ')+Nfull(Math.abs(pnl));
+  pnlEl.className='kpi-val '+(pnl>=0?'gr':'re');
+  gI('kpi-pnl-card').className='kpi '+(pnl>=0?'gr':'re');
+  gI('kpi-pnl-pct').textContent=NP(pnlPct)+' از سرمایه اولیه';
+  gI('kpi-annual').textContent=NP1(ann);
+  gI('kpi-day-sub').textContent='روز '+elapsed.toLocaleString('fa-IR')+' · '+dateStr;
+  gI('kpi-cash').textContent=Nfull(D.cashBalance);
+  gI('kpi-cash-ratio').textContent=NP2(cashRatio);
+
+  gI('ov-req').textContent=Nfull(reqVal);
+  gI('ov-act').textContent=Nfull(totalVal);
+  const devEl=gI('ov-dev');
+  devEl.textContent=Nsigned(dev);
+  devEl.className='srow-val '+sc(dev);
+  gI('ov-min-profit').textContent=Nfull(minProfit);
+  const pnl2El=gI('ov-pnl2');
+  pnl2El.textContent=Nsigned(pnl);
+  pnl2El.className='srow-val '+sc(pnl);
+
+  gI('pf-pnl-val').textContent=Nsigned(pnl);
+  gI('pf-pnl-val').className='kpi-val '+sc(pnl);
+  gI('pf-pnl-sub').textContent=NP(pnlPct)+' از سرمایه';
+
+  gI('ov-dte').textContent=Math.max(0,dte).toLocaleString('fa-IR');
+  gI('ov-elapsed').textContent=elapsed.toLocaleString('fa-IR')+' روز';
+  gI('ov-total-days').textContent='~'+totalDays+' روز';
+  gI('ov-dte-bar').style.width=(totalDays>0?Math.min(elapsed/totalDays*100,100):0)+'%';
+  gI('de-dte-sel').textContent=Math.max(0,dte).toLocaleString('fa-IR');
+
+  renderOvPositions(gold,c1600,c1800);
+  drawChart(rear,gold);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  POSITIONS TABLE — ITM/OTM به درصد + ردیف جمع
+// ══════════════════════════════════════════════════════════════════
+function renderOvPositions(gold,c1600,c1800){
+  const D=DASHBOARD_DATA;
+  const pos=D.openPositions;
+  const rows=[
+    {n:'GoldBar',     type:'Long',      qty:pos.goldBar.qty,     px:gold, strike:null},
+    {n:'GBMO05C1600', type:'Short Call', qty:pos.GBMO05C1600.qty, px:c1600,strike:pos.GBMO05C1600.strike},
+    {n:'GBMO05C1800', type:'Short Call', qty:pos.GBMO05C1800.qty, px:c1800,strike:pos.GBMO05C1800.strike},
+  ];
+  let html='', totalMktVal=0;
+  for(const r of rows){
+    const mktVal=r.qty*r.px;
+    totalMktVal+=mktVal;
+    // ITM/OTM به درصد: (Strike − Spot) / Spot
+    let itmHtml='—';
+    if(r.strike){
+      const dist=(r.strike-gold)/gold; // مثبت=OTM, منفی=ITM
+      const pct=NP2(Math.abs(dist));
+      if(gold>r.strike)      itmHtml=`<span class="badge badge-itm">ITM −${pct}</span>`;
+      else if(gold<r.strike) itmHtml=`<span class="badge badge-otm">OTM +${pct}</span>`;
+      else                   itmHtml=`<span class="badge badge-neu">ATM ۰٪</span>`;
+    }
+    let pvHtml='—',offsetHtml='—';
+    if(r.strike){
+      const entries=D.pmEntries.filter(e=>e.symbol===r.n);
+      if(entries.length>0){
+        let totalPV=0;
+        entries.forEach(e=>{
+          const daysEl=Math.max(0,Jalali.diff(e.entryDate,gI('ov-date').value)||0);
+          const linTarget=e.maxProfitPerContract*(daysEl/e.totalDTE);
+          const pnlPC=(gold-e.costBasisPerContract)+(e.premiumPerContract-r.px);
+          totalPV+=linTarget>0?pnlPC/linTarget:0;
+        });
+        const avgPV=totalPV/entries.length;
+        const pvColor=avgPV>=2?'var(--green)':avgPV>=1?'var(--warn)':'var(--red)';
+        const pvClass=avgPV>=2?'pv-good':avgPV>=1?'pv-warn':'pv-bad';
+        pvHtml=`<div style="font-size:13px;font-weight:700;color:${pvColor}">${avgPV.toFixed(2)}</div>
+                <div class="pv-bar ${pvClass}"><div class="pv-fill" style="width:${Math.min(avgPV/3*100,100)}%"></div></div>`;
+        offsetHtml=avgPV>=2
+          ?'<span class="badge badge-opt"><span class="dot"></span>بهینه</span>'
+          :'<span class="badge badge-sub"><span class="dot"></span>نگه‌دار</span>';
+      }
+    }
+    const typeBadge=r.type==='Long'
+      ?'<span class="badge badge-long">Long</span>'
+      :'<span class="badge badge-short">Short</span>';
+    html+=`<tr>
+      <td style="font-weight:600">${r.n}</td>
+      <td>${typeBadge}</td>
+      <td class="${r.qty>0?'pos':'neg'}">${r.qty.toLocaleString('fa-IR')}</td>
+      <td>${Nfull(r.px)}</td>
+      <td class="${mktVal>=0?'pos':'neg'}">${Nfull(mktVal)}</td>
+      <td>${r.strike?Nfull(r.strike):'—'}</td>
+      <td>${itmHtml}</td>
+      <td>${pvHtml}</td>
+      <td>${offsetHtml}</td>
+    </tr>`;
+  }
+  gI('ov-pos-body').innerHTML=html;
+  // ردیف جمع
+  const tvClass=totalMktVal>=0?'pos':'neg';
+  gI('ov-pos-foot').innerHTML=`
+    <tr style="background:var(--s2);font-weight:700;border-top:2px solid var(--b2)">
+      <td colspan="4" style="color:var(--text2);font-size:12px">جمع ارزش بازار پوزیشن‌ها (بدون نقد)</td>
+      <td class="${tvClass}">${Nfull(totalMktVal)}</td>
+      <td colspan="2"></td>
+      <td colspan="2" style="color:var(--text3);font-size:11px">+ نقد: ${Nfull(DASHBOARD_DATA.cashBalance)} → کل: ${Nfull(totalMktVal+DASHBOARD_DATA.cashBalance)}</td>
+    </tr>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  CHART — محور عمودی + tooltip هاور + خط اعمال مسطح
+// ══════════════════════════════════════════════════════════════════
+let _chartMeta=null;
+
+function drawChart(rearOverride,spotOverride){
+  const cv=gI('ov-chart');
+  if(!cv) return;
+  const D=DASHBOARD_DATA;
+  const rear=rearOverride!=null?rearOverride:(+gI('inp-rear').value||D.requiredAnnualRate);
+  const spot=spotOverride!=null?spotOverride:(+gI('ov-gold').value||0);
+  const isLight=document.documentElement.classList.contains('light');
+  const gridC =isLight?'rgba(180,190,210,.4)':'rgba(30,39,55,.6)';
+  const reqC  =isLight?'rgba(100,120,160,.7)':'rgba(74,85,104,.65)';
+  const lblC  =isLight?'rgba(60,80,110,.85)':'rgba(100,120,150,.85)';
+  const axisC =isLight?'rgba(60,80,110,.6)':'rgba(100,120,160,.55)';
+
+  const dpr=window.devicePixelRatio||1;
+  const W=cv.parentElement.clientWidth-4, H=210;
+  cv.width=W*dpr; cv.height=H*dpr;
+  cv.style.width=W+'px'; cv.style.height=H+'px';
+  const ctx=cv.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  const exerciseVal=calcExpectedExerciseValue(spot);
+
+  const chartData=D.returnHistory.map(r=>({
+    ...r, reqCalc:calcRequiredValue(D.initialCapital,rear,r.day)
+  }));
+
+  const allVals=[...chartData.map(r=>r.act),...chartData.map(r=>r.reqCalc),exerciseVal];
+  const mn=Math.min(...allVals)*0.997, mx=Math.max(...allVals)*1.003;
+
+  // محور عمودی در سمت چپ canvas (چون canvas LTR است)
+  const pad={l:70,r:10,t:10,b:22};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  const xOf=i=>pad.l+(i/Math.max(chartData.length-1,1))*cW;
+  const yOf=v=>pad.t+(1-(v-mn)/(mx-mn))*cH;
+
+  // ── محور عمودی — ۵ سطح ──
+  ctx.font='9px Vazirmatn,sans-serif';
+  for(let g=0;g<=4;g++){
+    const v=mn+(mx-mn)*(1-g/4);
+    const y=yOf(v);
+    ctx.strokeStyle=gridC; ctx.lineWidth=1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cW,y); ctx.stroke();
+    // label: میلیارد ریال با ۱ رقم اعشار
+    ctx.fillStyle=axisC; ctx.textAlign='left';
+    ctx.fillText((v/1e9).toFixed(1)+' م',2,y+3);
+  }
+  // خط محور
+  ctx.strokeStyle=axisC; ctx.lineWidth=1; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+cH); ctx.stroke();
+
+  // ── خط Required — dashed ──
+  ctx.beginPath(); ctx.setLineDash([5,4]); ctx.strokeStyle=reqC; ctx.lineWidth=1.5;
+  chartData.forEach((d,i)=>{const x=xOf(i),y=yOf(d.reqCalc);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // ── خط اعمال — flat dotted purple ──
+  const exY=yOf(exerciseVal);
+  ctx.beginPath(); ctx.setLineDash([3,5]); ctx.strokeStyle='#9b59b6'; ctx.lineWidth=1.8;
+  ctx.moveTo(xOf(0),exY); ctx.lineTo(xOf(chartData.length-1),exY);
+  ctx.stroke(); ctx.setLineDash([]);
+  // نقطه انتهایی
+  ctx.beginPath(); ctx.arc(xOf(chartData.length-1),exY,5,0,Math.PI*2);
+  ctx.fillStyle='#9b59b6'; ctx.fill();
+  // برچسب مقدار اعمال
+  ctx.fillStyle='#9b59b6'; ctx.font='9px Vazirmatn,sans-serif'; ctx.textAlign='left';
+  ctx.fillText((exerciseVal/1e9).toFixed(1)+' م',pad.l+2,exY-4);
+
+  // ── Actual fill ──
+  ctx.beginPath();
+  chartData.forEach((d,i)=>{const x=xOf(i),y=yOf(d.act);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.lineTo(xOf(chartData.length-1),pad.t+cH); ctx.lineTo(xOf(0),pad.t+cH); ctx.closePath();
+  const gr=ctx.createLinearGradient(0,0,0,H);
+  gr.addColorStop(0,'rgba(212,168,83,.16)'); gr.addColorStop(1,'rgba(212,168,83,.01)');
+  ctx.fillStyle=gr; ctx.fill();
+
+  // ── Actual line ──
+  ctx.beginPath(); ctx.strokeStyle='#d4a853'; ctx.lineWidth=2;
+  chartData.forEach((d,i)=>{const x=xOf(i),y=yOf(d.act);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+
+  // ── Dots ──
+  chartData.forEach((d,i)=>{
+    ctx.beginPath(); ctx.arc(xOf(i),yOf(d.act),3.5,0,Math.PI*2);
+    ctx.fillStyle=d.act>=d.reqCalc?'#2ecc71':'#e74c3c';
+    ctx.fill();
+  });
+
+  // ── X labels ──
+  ctx.fillStyle=lblC; ctx.font='9px Vazirmatn,sans-serif'; ctx.textAlign='center';
+  const step=Math.ceil(chartData.length/7);
+  chartData.forEach((d,i)=>{
+    if(i%step===0||i===chartData.length-1) ctx.fillText(d.d,xOf(i),H-4);
+  });
+
+  _chartMeta={chartData,pad,cW,cH,mn,mx,W,H,xOf,yOf,rear,exerciseVal};
+}
+
+// ── Tooltip hover ──
+function initChartHover(){
+  const cv=gI('ov-chart'), tt=gI('chart-tooltip');
+  if(!cv||!tt) return;
+  cv.addEventListener('mousemove',e=>{
+    if(!_chartMeta) return;
+    const {chartData,xOf,yOf}=_chartMeta;
+    const rect=cv.getBoundingClientRect();
+    const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+    const D=DASHBOARD_DATA;
+    let best=-1,bestDist=Infinity;
+    chartData.forEach((d,i)=>{
+      const dist=Math.hypot(mx-xOf(i),my-yOf(d.act));
+      if(dist<bestDist){bestDist=dist;best=i;}
+    });
+    if(best<0||bestDist>28){tt.style.display='none';return;}
+    const d=chartData[best];
+    const dailyRet=D.initialCapital>0?(d.act/D.initialCapital)-1:0;
+    let annRet=0;
+    if(d.day>0&&dailyRet>-1) annRet=Math.pow(1+dailyRet,365/d.day)-1;
+    gI('tt-date').textContent='۱۴۰۵/'+d.d;
+    gI('tt-act').textContent=Nfull(d.act);
+    gI('tt-req').textContent=Nfull(d.reqCalc);
+    gI('tt-ret').textContent=NP(dailyRet);
+    gI('tt-ann').textContent=NP1(annRet);
+    tt.style.display='block';
+    const txPos=e.clientX+14, ttW=tt.offsetWidth||220;
+    tt.style.left=(txPos+ttW>window.innerWidth?e.clientX-ttW-14:txPos)+'px';
+    tt.style.top=(e.clientY-10)+'px';
+  });
+  cv.addEventListener('mouseleave',()=>{tt.style.display='none';});
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  DECISION ENGINE — گروه‌بندی سررسید، ستون‌های جدید، فرمول‌های اصلاح‌شده
+// ══════════════════════════════════════════════════════════════════
+function calcDecision(){
+  const D=DASHBOARD_DATA;
+  const S    =+gI('de-spot').value||24043673;
+  const sigma=+gI('de-vol').value ||0.5194;
+  const r    =+gI('de-rf').value  ||0.40;
+  const msp  =+gI('de-msp').value ||-0.20;
+  const rear =+gI('de-rear').value||D.requiredAnnualRate;
+  const bear =+gI('de-bear').value||0.45;
+  const dateStr=gI('ov-date').value;
+
+  const minStrike=S*(1+msp);
+  gI('de-minstrike').textContent=Nfull(minStrike);
+  gI('de-msp-display').textContent=NP1(msp);
+
+  const nearDTE=Math.max(0,Jalali.diff(dateStr,D.optionExpiryDate)||70);
+  const nearEM=S*sigma*Math.sqrt(nearDTE/365);
+  gI('de-em').textContent=Nfull(nearEM);
+  gI('de-em-pct').textContent=NP1(nearEM/S)+' از Spot';
+  gI('de-spot-em-up').textContent=Nfull(S+nearEM);
+  gI('de-spot-em-dn').textContent=Nfull(S-nearEM);
+  gI('de-dte-sel').textContent=nearDTE.toLocaleString('fa-IR');
+
+  // گروه‌بندی بر اساس سررسید
+  const groups={};
+  for(const c of D.gbChain){
+    if(!groups[c.expiry]) groups[c.expiry]=[];
+    groups[c.expiry].push(c);
+  }
+
+  let outerHtml='';
+  for(const [expiry,contracts] of Object.entries(groups)){
+    const chainDTE=Math.max(0,Jalali.diff(dateStr,expiry)||0);
+    const T=chainDTE/365;
+    const em=S*sigma*Math.sqrt(T);
+
+    outerHtml+=`
+    <div class="sec">${Jalali.toDisplay(expiry)} — DTE: ${chainDTE} روز</div>
+    <div class="chain-group-hd">
+      <span class="cg-expiry">${Jalali.toDisplay(expiry)}</span>
+      <span class="cg-stat">DTE: <span>${chainDTE}</span></span>
+      <span class="cg-stat">Expected Move: <span>${Nfull(em)}</span> (${NP1(em/S)})</span>
+      <span class="cg-stat">Spot+EM: <span>${Nfull(S+em)}</span></span>
+      <span class="cg-stat">Spot−EM: <span>${Nfull(S-em)}</span></span>
+    </div>
+    <div class="card gap">
+    <div class="tbl-scroll">
+    <table class="tbl"><thead><tr>
+      <th>نماد</th><th>Strike (ریال)</th><th>Strike Dist%</th><th>ITM/OTM</th>
+      <th>BS Premium</th><th>Required Prem</th><th>Bench Prem</th><th>Min Acceptable</th>
+      <th>Intrinsic</th><th>Prob Touch</th><th>Delta</th>
+      <th>CC Return</th><th>CC YTM</th><th>Buyer BE%</th><th>Seller BE%</th>
+      <th>IV</th><th>قیمت بازار</th><th>وضعیت</th>
+    </tr></thead><tbody>`;
+
+    for(const c of contracts){
+      // همه مقادیر پویا — بدون استفاده از strikeDist/intrinsic هاردکود
+      const strikeDist=(c.strike/S)-1;
+      const intrinsic=Math.max(0,S-c.strike);
+      const p=calcCCPremiums(S,c.strike,r,sigma,chainDTE,rear,bear);
+
+      // مبنای پرمیوم
+      const upKey='u_'+c.sym.replace(/[^a-z0-9]/gi,'_');
+      const userPx=_userPrices[c.sym]??null;
+      const basisPrem=(_premBasis==='user'&&userPx!=null)?userPx:p.minAcceptable;
+      const hasBasis=_premBasis==='min'||(_premBasis==='user'&&userPx!=null);
+
+      // ITM/OTM badge
+      let itmHtml;
+      if(S>c.strike)       itmHtml='<span class="badge badge-itm">ITM</span>';
+      else if(S<c.strike)  itmHtml='<span class="badge badge-otm">OTM</span>';
+      else                 itmHtml='<span class="badge badge-neu">ATM</span>';
+
+      // Buyer Breakeven%: (Strike + Premium) / Spot - 1
+      const buyerBE=hasBasis?((c.strike+basisPrem)/S)-1:null;
+      // Seller Breakeven%: (Spot - Premium) / Spot - 1 — حداکثر افت مجاز
+      const sellerBE=hasBasis?((S-basisPrem)/S)-1:null;
+      // CC Return to expiry (فرض اعمال): (Strike + Premium - Spot) / Spot
+      const ccRet=hasBasis?(c.strike+basisPrem-S)/S:null;
+      // CC YTM
+      const ccYTM=(hasBasis&&ccRet!=null&&chainDTE>0&&ccRet>-1)
+        ?Math.pow(1+ccRet,365/chainDTE)-1:null;
+      // IV
+      const ivVal=(hasBasis&&chainDTE>0)?impliedVol(S,c.strike,r,T,basisPrem):null;
+
+      // وضعیت — بر اساس MSP پویا
+      // Strike <= MinStrike → پوشش کافی (strike پایین‌تر از حداقل پوشش مجاز است)
+      const coverageOK=c.strike<=minStrike;
+      const statusHtml=coverageOK
+        ?'<span class="badge badge-opt"><span class="dot"></span>پوشش کافی</span>'
+        :'<span class="badge badge-sub">خارج از پوشش</span>';
+
+      // نمایش reqPrem: اگر reqRaw منفی بود، نشان می‌دهیم که strike خودش REAR را تأمین می‌کند
+      const reqDisplay=p.reqRawDisplay<0
+        ?`<span style="color:var(--green);font-size:10px" title="Strike به‌تنهایی REAR را تأمین می‌کند — پرمیوم اضافی لازم نیست">✓ ${Nfull(Math.abs(p.reqRawDisplay))}</span>`
+        :Nfull(p.reqPrem);
+
+      outerHtml+=`<tr ${chainDTE<=80?'style="background:rgba(212,168,83,.04)"':''}>
+        <td style="font-weight:600">${c.sym}</td>
+        <td>${Nfull(c.strike)}</td>
+        <td class="${strikeDist<0?'pos':'neg'}">${NP1(strikeDist)}</td>
+        <td>${itmHtml}</td>
+        <td style="color:var(--gold)">${Nfull(p.bs.price)}</td>
+        <td style="color:var(--text2)">${reqDisplay}</td>
+        <td style="color:var(--text2)">${Nfull(p.benchPrem)}</td>
+        <td style="font-weight:600">${Nfull(p.minAcceptable)}</td>
+        <td>${Nfull(intrinsic)}</td>
+        <td>${NP1(p.bs.probTouch)}</td>
+        <td>${p.bs.delta.toFixed(3)}</td>
+        <td class="${ccRet!=null?sc(ccRet):''}">${ccRet!=null?NP2(ccRet):'—'}</td>
+        <td class="${ccYTM!=null?sc(ccYTM):''}" style="font-weight:600">${ccYTM!=null?NP1(ccYTM):'—'}</td>
+        <td class="${buyerBE!=null?sc(buyerBE):''}">${buyerBE!=null?NP2(buyerBE):'—'}</td>
+        <td class="${sellerBE!=null?sc(sellerBE):''}">${sellerBE!=null?NP2(sellerBE):'—'}</td>
+        <td style="color:var(--purple)">${ivVal!=null?NP1(ivVal):'—'}</td>
+        <td><input style="width:88px;padding:3px 6px;font-size:11px;background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--text);font-family:Vazirmatn,sans-serif"
+          id="${upKey}" value="${userPx??''}" placeholder="قیمت"
+          oninput="_userPrices['${c.sym}']=+this.value||null;calcDecision()"></td>
+        <td>${statusHtml}</td>
+      </tr>`;
+    }
+    outerHtml+=`</tbody></table></div></div>`;
+  }
+  gI('de-chain-groups').innerHTML=outerHtml;
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+//  POSITION MANAGER
+//  daysElapsed: پویا از entryDate تا pm-date
+// ══════════════════════════════════════════════════════════════════
+
+function calcPM() {
+  const D       = DASHBOARD_DATA;
+  const spot    = +gI('pm-spot').value  || 0;
+  const c1600Px = +gI('pm-c1600').value || 0;
+  const c1800Px = +gI('pm-c1800').value || 0;
+  const dateStr = gI('pm-date').value || gI('ov-date').value;
+
+  const getPx = sym => sym.includes('C1600') ? c1600Px : c1800Px;
+
+  let cardsHtml = '', tableHtml = '';
+
+  for (const e of D.pmEntries) {
+    // daysElapsed: محاسبه پویا
+    const daysElapsed = Math.max(0, Jalali.diff(e.entryDate, dateStr) || 0);
+    const callPxToday = getPx(e.symbol);
+
+    // PV formula — documented:
+    // ulPnL per contract = spot - costBasis (تفاوت قیمت دارایی پایه)
+    // callPnL per contract = premiumReceived - buybackPrice
+    // linearTarget = maxProfit × (daysElapsed / totalDTE)
+    // PV = (ulPnL + callPnL) / linearTarget
+    const ulPnL   = spot - e.costBasisPerContract;
+    const callPnL = e.premiumPerContract - callPxToday;
+    const totalPnLpc = ulPnL + callPnL;
+    const linearTarget = e.totalDTE > 0
+      ? e.maxProfitPerContract * (daysElapsed / e.totalDTE)
+      : 0;
+    const pv = linearTarget > 0 ? totalPnLpc / linearTarget : 0;
+    const isOptimal = pv >= 2;
+
+    const pvClass = pv>=2 ? 'pv-good' : pv>=1 ? 'pv-warn' : 'pv-bad';
+    const pvColor = pv>=2 ? 'var(--green)' : pv>=1 ? 'var(--warn)' : 'var(--red)';
+    const pvBarW  = Math.min(pv/3*100, 100);
+
+    cardsHtml += `<div style="background:var(--s1);border:1px solid ${isOptimal?'rgba(46,204,113,.3)':'var(--b1)'};border-radius:var(--r);padding:16px 18px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div>
+          <span style="font-weight:700;font-size:14px">${e.symbol}</span>
+          <span style="font-size:11px;color:var(--text2);margin-right:8px">ورود: ${Jalali.toDisplay(e.entryDate)} · حجم: ${e.qty} · روز گذشته: ${daysElapsed}</span>
+        </div>
+        ${isOptimal
+          ? '<span class="badge badge-opt"><span class="dot"></span>آفست بهینه است — PV ≥ 2</span>'
+          : '<span class="badge badge-sub"><span class="dot"></span>نگه‌دار — PV < 2</span>'}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px">
+        <div><div style="font-size:11px;color:var(--text2)">سود Underlying/contract</div>
+          <div style="font-size:14px;font-weight:600;color:${ulPnL>=0?'var(--green)':'var(--red)'}">${Nsigned(ulPnL)}</div></div>
+        <div><div style="font-size:11px;color:var(--text2)">سود کال (آفست)/contract</div>
+          <div style="font-size:14px;font-weight:600;color:${callPnL>=0?'var(--green)':'var(--red)'}">${Nsigned(callPnL)}</div></div>
+        <div><div style="font-size:11px;color:var(--text2)">سود کل واقعی/contract</div>
+          <div style="font-size:14px;font-weight:600;color:${totalPnLpc>=0?'var(--green)':'var(--red)'}">${Nsigned(totalPnLpc)}</div></div>
+        <div><div style="font-size:11px;color:var(--text2)">سود خطی هدف/contract</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text2)">${Nfull(linearTarget)}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:12px;color:var(--text2)">PV = سود واقعی ÷ سود خطی هدف</span>
+            <span style="font-size:16px;font-weight:700;color:${pvColor}">PV = ${pv.toFixed(2)}</span>
+          </div>
+          <div class="pv-bar ${pvClass}"><div class="pv-fill" style="width:${pvBarW}%"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:3px;font-size:10px;color:var(--text3)">
+            <span>0</span><span style="color:var(--warn)">1.0</span><span style="color:var(--green)">2.0 (بهینه)</span><span>3.0</span>
+          </div>
+        </div>
+        <div style="text-align:center;min-width:80px">
+          <div style="font-size:11px;color:var(--text2)">Max Profit/c</div>
+          <div style="font-size:13px;font-weight:600;color:var(--gold)">${Nfull(e.maxProfitPerContract)}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">DTE ورود / گذشته</div>
+          <div style="font-size:13px;font-weight:600">${e.totalDTE} / ${daysElapsed}</div>
+        </div>
+      </div>
+    </div>`;
+
+    tableHtml += `<tr>
+      <td style="font-weight:600">${e.symbol}</td>
+      <td>${Jalali.toDisplay(e.entryDate)}</td>
+      <td>${e.qty}</td>
+      <td>${Nfull(e.strike)}</td>
+      <td>${e.totalDTE}</td>
+      <td>${Nfull(e.premiumPerContract)}</td>
+      <td>${Nfull(e.maxProfitPerContract)}</td>
+      <td>${Nfull(linearTarget)}</td>
+      <td class="${ulPnL>=0?'pos':'neg'}">${Nsigned(ulPnL)}</td>
+      <td class="${callPnL>=0?'pos':'neg'}">${Nsigned(callPnL)}</td>
+      <td class="${totalPnLpc>=0?'pos':'neg'}">${Nsigned(totalPnLpc)}</td>
+      <td style="font-weight:700;color:${pvColor}">${pv.toFixed(2)}</td>
+      <td>${isOptimal
+        ? '<span class="badge badge-opt"><span class="dot"></span>بهینه</span>'
+        : '<span class="badge badge-sub"><span class="dot"></span>نگه‌دار</span>'}</td>
+    </tr>`;
+  }
+
+  gI('pm-cards-container').innerHTML = cardsHtml;
+  gI('pm-table-body').innerHTML = tableHtml;
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+//  PORTFOLIO TAB
+// ══════════════════════════════════════════════════════════════════
+
+function renderPortfolio() {
+  const D = DASHBOARD_DATA;
+
+  // سرمایه اولیه به ریال کامل
+  gI('pf-init-cap').textContent = Nfull(D.initialCapital);
+
+  // Scenario table
+  const currentSpot = +gI('ov-gold').value || 24043673;
+  let html = '';
+  for (const s of D.scenario) {
+    const isCurrent = Math.abs(s[1] - currentSpot) < 500000;
+    html += `<tr class="${s[3]>=0?'scenario-green':'scenario-red'}${isCurrent?' scenario-current':''}">
+      <td>${(s[0]*100).toFixed(0)}٪</td>
+      <td>${Nfull(s[1])}</td>
+      <td>${Nfull(s[2])}</td>
+      <td class="${s[3]>=0?'pos':'neg'}">${Nsigned(s[3])}</td>
+    </tr>`;
+  }
+  gI('pf-scenario-body').innerHTML = html;
+
+  // Trade log — با اعداد ریال کامل
+  gI('trade-count-badge').textContent = D.trades.length + ' ردیف';
+  let thtml = '';
+  for (const t of D.trades) {
+    const tc = t.t==='خرید'?'pos':t.t==='فروش'?'neg':t.t==='خرید-آفست'?'blue':t.t==='فروش-آفست'?'warn':'';
+    thtml += `<tr>
+      <td>${t.d}</td>
+      <td>${t.n||'—'}</td>
+      <td class="${tc}" style="font-weight:600">${t.t}</td>
+      <td class="${t.q!=null?(t.q>0?'pos':'neg'):''}">${t.q!=null?(t.q>0?'+':'')+t.q.toLocaleString('fa-IR'):'—'}</td>
+      <td class="${t.v!=null?sc(t.v):''}">${t.v!=null?Nfull(t.v):'—'}</td>
+      <td class="neg">${t.f!=null?Nfull(t.f):'—'}</td>
+      <td class="${t.tot!=null?sc(t.tot):''}">${t.tot!=null?Nfull(t.tot):'—'}</td>
+      <td class="${t.pnl!=null?sc(t.pnl):''}">${t.pnl!=null?Nsigned(t.pnl):'—'}</td>
+      <td style="font-size:11px;color:var(--text3)">${t.note||'—'}</td>
+    </tr>`;
+  }
+  gI('pf-trade-body').innerHTML = thtml;
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════
+
+window.addEventListener('DOMContentLoaded',()=>{
+  applyStoredTheme();
+  gI('top-date').textContent=gI('ov-date').value;
+  refreshAll();
+  calcDecision();
+  renderPortfolio();
+  initChartHover();
+  window.addEventListener('resize',()=>{
+    if(gI('page-overview').classList.contains('active')) drawChart();
+  });
+});
+</script>
+</body>
+</html>
