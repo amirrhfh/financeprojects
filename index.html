@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGAH AMC — ساختار سازمانی</title>
+<style>
+  #password-overlay {
+    position: fixed;
+    inset: 0;
+    background: #0e1117;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    font-family: 'Vazirmatn', sans-serif;
+  }
+  #password-box {
+    background: #161b27;
+    border: 1px solid #2a3347;
+    border-radius: 18px;
+    padding: 48px 40px;
+    width: 340px;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+  #password-box .lock-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+  #password-box h2 {
+    color: #e8edf5;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  #password-box p {
+    color: #8896b0;
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+  #password-input {
+    width: 100%;
+    padding: 13px 16px;
+    background: #1e2535;
+    border: 1.5px solid #2a3347;
+    border-radius: 10px;
+    color: #e8edf5;
+    font-size: 16px;
+    font-family: 'Vazirmatn', sans-serif;
+    text-align: center;
+    letter-spacing: 4px;
+    outline: none;
+    transition: border-color .2s;
+    margin-bottom: 14px;
+  }
+  #password-input:focus {
+    border-color: #3574e2;
+  }
+  #password-submit {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #3574e2, #2056c0);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Vazirmatn', sans-serif;
+    cursor: pointer;
+    transition: opacity .2s;
+  }
+  #password-submit:hover { opacity: 0.88; }
+  #password-error {
+    color: #e85d5d;
+    font-size: 12px;
+    margin-top: 12px;
+    min-height: 18px;
+  }
+</style>
+<script>
+  // Runs immediately — before any page content renders
+  (function() {
+    function checkPassword() {
+      var overlay = document.getElementById('password-overlay');
+      var input   = document.getElementById('password-input');
+      var error   = document.getElementById('password-error');
+      var val     = input.value;
+      if (val === '1234') {
+        overlay.style.display = 'none';
+        document.body.classList.remove('locked');
+      } else {
+        error.textContent = 'رمز اشتباه است. دوباره تلاش کنید.';
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      var overlay = document.getElementById('password-overlay');
+      var input   = document.getElementById('password-input');
+      // Always show — no memory, no bypass
+      overlay.style.display = 'flex';
+      setTimeout(function(){ input.focus(); }, 100);
+
+      document.getElementById('password-submit').addEventListener('click', checkPassword);
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') checkPassword();
+      });
+    });
+  })();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f3f8;
+    --surface: #ffffff;
+    --surface2: #eef1f6;
+    --surface3: #e5eaf3;
+    --border: #dde2ec;
+    --text: #1a2035;
+    --text-muted: #6b7a99;
+    --accent: #3574e2;
+    --gold: #b8860b;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-hover: 0 8px 28px rgba(0,0,0,0.14);
+    --mgmt:      #3574e2;
+    --investment:#0f9e7b;
+    --analysis:  #d4621a;
+    --operations:#8b3dd4;
+    --bizdev:    #d43a3a;
+    --compliance:#1a9fba;
+  }
+  body.dark {
+    --bg: #0e1117;
+    --surface: #161b27;
+    --surface2: #1e2535;
+    --surface3: #252f44;
+    --border: #2a3347;
+    --text: #e8edf5;
+    --text-muted: #8896b0;
+    --accent: #4f8ef7;
+    --gold: #c9a84c;
+    --shadow: 0 2px 12px rgba(0,0,0,0.4);
+    --shadow-hover: 0 8px 28px rgba(0,0,0,0.55);
+    --mgmt:      #4f8ef7;
+    --investment:#2ec4a0;
+    --analysis:  #e07b39;
+    --operations:#a855f7;
+    --bizdev:    #e85d5d;
+    --compliance:#3bbfcf;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body.locked > *:not(#password-overlay) { visibility: hidden; }
+  body {
+    font-family: 'Vazirmatn', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    direction: rtl;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .header-logo { display: flex; align-items: center; gap: 14px; }
+  .logo-badge {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--accent), #2ec4a0);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px; color: #fff;
+    box-shadow: 0 4px 12px rgba(53,116,226,0.35);
+  }
+  .header-title { font-size: 16px; font-weight: 700; }
+  .header-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ─── STATS BAR ─── */
+  .stats-bar {
+    padding: 20px 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+  .stat-total {
+    background: linear-gradient(135deg, var(--accent), #2056c0);
+    border-radius: 14px;
+    padding: 16px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 110px;
+    box-shadow: 0 4px 16px rgba(53,116,226,0.3);
+    flex-shrink: 0;
+  }
+  body.dark .stat-total { background: linear-gradient(135deg, #3a6fd8, #1a3fa0); }
+  .stat-total .s-val { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; }
+  .stat-total .s-label { font-size: 11px; color: rgba(255,255,255,0.85); font-weight: 500; }
+  .stats-depts {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex: 1;
+    align-items: center;
+  }
+  .stat-dept {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 90px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-dept::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--dcolor);
+    border-radius: 0 0 12px 12px;
+  }
+  .stat-dept:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--dcolor);
+  }
+  .stat-dept .s-val { font-size: 22px; font-weight: 800; color: var(--dcolor); line-height: 1; }
+  .stat-dept .s-label { font-size: 10px; color: var(--text-muted); font-weight: 500; text-align: center; }
+
+  /* ─── TABS ─── */
+  .tabs-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    gap: 4px;
+  }
+  .tab-btn {
+    padding: 14px 22px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-muted);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ─── OVERVIEW ─── */
+  .overview-wrap { padding: 32px; overflow-x: auto; }
+  .overview-canvas { min-width: 1100px; }
+  .ov-tree { display: flex; flex-direction: column; align-items: center; }
+  .conn-v { width: 2px; background: var(--border); margin: 0 auto; }
+
+  /* Top-level nodes */
+  .ov-node-group {
+    background: linear-gradient(135deg,#e8f0ff,#d4e5ff);
+    border: 2px solid #8ab0f5;
+    border-radius: 16px;
+    padding: 18px 32px;
+    text-align: center;
+    min-width: 260px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  body.dark .ov-node-group { background: linear-gradient(135deg,#192040,#1e2850); border-color: #3a60c0; }
+  .ov-node-group:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+  .ov-node-group .n-tag { font-size: 10px; color: var(--text-muted); margin-bottom: 5px; letter-spacing: .07em; }
+  .ov-node-group .n-name { font-size: 17px; font-weight: 800; color: var(--accent); }
+  .ov-node-group .n-title { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+
+  .ov-node-ceo {
+    background: linear-gradient(135deg,#dcf5ec,#c8f0e0);
+    border: 2px solid #7dd4b8;
+    border-radius: 16px;
+    padding: 16px 32px;
+    text-align: center;
+    min-width: 240px;
+    transition: transform .15s, box-shadow .15s;
+  }
+  body.dark .ov-node-ceo { background: linear-gradient(135deg,#152e26,#1a3a30); border-color: #2d9e80; }
+  .ov-node-ceo:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+  .ov-node-ceo .n-tag { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; letter-spacing: .07em; }
+  .ov-node-ceo .n-name { font-size: 16px; font-weight: 800; color: var(--investment); }
+  .ov-node-ceo .n-title { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  /* Direct reports under CEO */
+  .ov-direct-row { display: flex; gap: 14px; justify-content: center; }
+  .ov-direct-node {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 11px;
+    padding: 11px 18px;
+    text-align: center;
+    min-width: 170px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .ov-direct-node:hover { border-color: var(--gold); box-shadow: var(--shadow); }
+  .ov-direct-node .n-name { font-weight: 700; font-size: 12px; color: var(--gold); }
+  .ov-direct-node .n-title { color: var(--text-muted); margin-top: 3px; font-size: 10px; line-height: 1.4; }
+
+  /* Dept columns */
+  .ov-depts-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .ov-dept-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 155px;
+    max-width: 195px;
+  }
+
+  /* Regular dept card */
+  .ov-dept-card {
+    width: 100%;
+    border-radius: 14px;
+    border: 2px solid var(--dcolor);
+    padding: 0;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .ov-dept-card-top {
+    padding: 14px 12px 12px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .ov-dept-card-top::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--dcolor);
+  }
+  .ov-dept-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); background: var(--surface2); }
+  .ov-dept-card .dc-name { font-size: 13px; font-weight: 800; color: var(--dcolor); margin-bottom: 8px; }
+  .ov-dept-card .dc-head { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .ov-dept-card .dc-head-title { font-size: 10px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+  .ov-dept-card-footer {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ov-dept-card .dc-count {
+    font-size: 11px; font-weight: 700;
+    color: var(--dcolor);
+    display: flex; align-items: center; gap: 3px;
+  }
+  .ov-dept-card .dc-hint { font-size: 9px; color: var(--text-muted); }
+
+  /* Investment card */
+  .ov-invest-card {
+    width: 100%;
+    border-radius: 14px;
+    border: 2px solid var(--investment);
+    text-align: center;
+    cursor: default;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .ov-invest-card:hover { box-shadow: var(--shadow-hover); }
+  .ov-invest-header {
+    padding: 14px 12px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    transition: background .15s;
+  }
+  .ov-invest-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--investment);
+  }
+  .ov-invest-header:hover { background: var(--surface2); }
+  .ov-invest-header .dc-name { font-size: 13px; font-weight: 800; color: var(--investment); margin-bottom: 6px; }
+  .ov-invest-header .dc-heads { font-size: 10px; color: var(--text-muted); line-height: 1.5; }
+  .ov-invest-footer {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ov-invest-footer .dc-count { font-size: 11px; font-weight: 700; color: var(--investment); }
+  .ov-invest-toggle {
+    font-size: 10px;
+    color: var(--investment);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid color-mix(in srgb, var(--investment) 30%, transparent);
+    background: none;
+    font-family: 'Vazirmatn', sans-serif;
+    display: flex; align-items: center; gap: 4px;
+    transition: all .2s;
+  }
+  .ov-invest-toggle:hover { background: color-mix(in srgb, var(--investment) 10%, transparent); }
+
+  .ov-invest-sub {
+    display: none;
+    padding: 10px 10px 12px;
+    gap: 8px;
+    flex-direction: column;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .ov-invest-sub.open { display: flex; }
+  .ov-sub-badge {
+    border-radius: 9px;
+    padding: 9px 11px;
+    text-align: right;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: border-color .15s;
+  }
+  .ov-sub-badge:hover { border-color: var(--investment); }
+  .ov-sub-badge .sb-label { font-weight: 700; color: var(--investment); font-size: 11px; }
+  .ov-sub-badge .sb-head { color: var(--text); font-size: 10px; margin-top: 3px; }
+  .ov-sub-badge .sb-count { color: var(--text-muted); font-size: 9px; margin-top: 2px; }
+  .invest-goto-btn {
+    margin-top: 2px;
+    width: 100%;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--investment) 40%, transparent);
+    background: color-mix(in srgb, var(--investment) 8%, transparent);
+    color: var(--investment);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 10px; font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .invest-goto-btn:hover { background: var(--investment); color: #fff; }
+
+  .chevron-icon { display: inline-block; transition: transform .25s; font-size: 10px; }
+  .chevron-icon.open { transform: rotate(180deg); }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    animation: modalIn .2s ease;
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform: translateY(14px) scale(0.97); }
+    to   { opacity:1; transform: translateY(0)   scale(1); }
+  }
+  .modal-header {
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky; top: 0;
+    background: var(--surface);
+    border-radius: 18px 18px 0 0;
+    z-index: 1;
+  }
+  .modal-color-bar { width: 5px; border-radius: 4px; align-self: stretch; min-height: 36px; flex-shrink: 0; }
+  .modal-title { font-size: 16px; font-weight: 800; flex: 1; }
+  .modal-count { font-size: 12px; color: var(--text-muted); }
+  .modal-close {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .modal-close:hover { background: var(--surface2); color: var(--text); }
+  .modal-body { padding: 20px 24px; }
+  .modal-team-group { margin-bottom: 20px; }
+  .modal-team-label {
+    font-size: 11px; font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: .06em;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal-team-label span { color: var(--dcolor); }
+  .modal-person-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 8px;
+  }
+  .modal-person {
+    background: var(--surface2);
+    border-radius: 9px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    transition: border-color .15s;
+  }
+  .modal-person:hover { border-color: var(--dcolor); }
+  .modal-person .mp-name { font-weight: 700; font-size: 12px; }
+  .modal-person .mp-title { color: var(--text-muted); margin-top: 3px; line-height: 1.4; font-size: 10px; }
+  .modal-goto-btn {
+    margin-top: 18px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid var(--dcolor);
+    background: color-mix(in srgb, var(--dcolor) 8%, transparent);
+    color: var(--dcolor);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .modal-goto-btn:hover { background: var(--dcolor); color: #fff; }
+
+  /* ─── FULL CHART ─── */
+  .full-wrap { padding: 32px; }
+  .dept-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .dept-block-header {
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; user-select: none;
+    transition: background .15s;
+  }
+  .dept-block-header:hover { background: var(--surface2); }
+  .dept-color-bar { width: 4px; height: 32px; border-radius: 4px; flex-shrink: 0; }
+  .dept-block-title { font-size: 15px; font-weight: 700; }
+  .dept-block-count { font-size: 12px; color: var(--text-muted); margin-right: auto; }
+  .dept-chevron { color: var(--text-muted); transition: transform .2s; font-size: 14px; }
+  .dept-block.collapsed .dept-chevron { transform: rotate(-90deg); }
+  .dept-block-body { padding: 0 24px 20px; }
+  .dept-block.collapsed .dept-block-body { display: none; }
+  .person-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .person-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px;
+    transition: border-color .2s, transform .15s;
+  }
+  .person-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .person-card-name { font-size: 13px; font-weight: 700; }
+  .person-card-title { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+  .person-card-team {
+    margin-top: 8px; font-size: 10px;
+    background: var(--surface3);
+    border-radius: 20px; padding: 2px 9px;
+    display: inline-block; color: var(--text-muted);
+  }
+  .person-card-manager { margin-top: 6px; font-size: 10px; color: var(--text-muted); }
+  .manager-badge { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 5px; vertical-align: middle; }
+  .unit-group { margin-bottom: 18px; }
+  .unit-label {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    letter-spacing: .05em; margin-bottom: 10px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+
+  /* ─── TABLE ─── */
+  .table-wrap { padding: 32px; }
+  .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .filter-bar input {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 16px; color: var(--text);
+    font-family: 'Vazirmatn', sans-serif; font-size: 13px; width: 260px;
+    outline: none; transition: border-color .2s;
+  }
+  .filter-bar input:focus { border-color: var(--accent); }
+  .filter-bar select {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 14px; color: var(--text);
+    font-family: 'Vazirmatn', sans-serif; font-size: 13px; outline: none; cursor: pointer;
+  }
+  .count-badge { font-size: 12px; color: var(--text-muted); margin-right: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    background: var(--surface); padding: 12px 16px; text-align: right;
+    font-weight: 600; color: var(--text-muted);
+    border-bottom: 2px solid var(--border); white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td { padding: 11px 16px; vertical-align: middle; }
+  .dept-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .row-num { color: var(--text-muted); font-size: 11px; }
+
+  /* Theme toggle */
+  .theme-toggle {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 7px 16px; color: var(--text-muted);
+    font-family: 'Vazirmatn', sans-serif; font-size: 12px;
+    cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .2s;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--text); }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* color-mix fallback */
+  @supports not (color: color-mix(in srgb, red 10%, transparent)) {
+    .ov-invest-toggle { border-color: var(--border); }
+    .modal-goto-btn { background: transparent; }
+    .invest-goto-btn { background: transparent; }
+  }
+</style>
+</head>
+<body class="locked">
+
+<!-- PASSWORD OVERLAY — shown on every load, no bypass -->
+<div id="password-overlay">
+  <div id="password-box">
+    <div class="lock-icon">🔒</div>
+    <h2>AGAH AMC</h2>
+    <p>برای ورود رمز عبور را وارد کنید</p>
+    <input type="password" id="password-input" placeholder="••••" autocomplete="off" />
+    <button id="password-submit">ورود</button>
+    <div id="password-error"></div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-logo">
+    <div class="logo-badge">آگاه</div>
+    <div>
+      <div class="header-title">AGAH Asset Management Company</div>
+      <div class="header-sub">شرکت سبدگردان آگاه — ساختار سازمانی</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <div style="font-size:12px;color:var(--text-muted)">آخرین بروزرسانی: ۱۴۰۵/۰۳/۱۶</div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 حالت تاریک</button>
+  </div>
+</div>
+
+<div class="stats-bar" id="statsBar"></div>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('overview',this)">🏢 نمای کلی</button>
+  <button class="tab-btn" onclick="switchTab('full',this)">👥 نمای کامل</button>
+  <button class="tab-btn" onclick="switchTab('table',this)">📋 جدول پرسنل</button>
+</div>
+
+<div class="tab-content active" id="tab-overview">
+  <div class="overview-wrap">
+    <div class="overview-canvas" id="overviewCanvas"></div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-full">
+  <div class="full-wrap" id="fullChart"></div>
+</div>
+
+<div class="tab-content" id="tab-table">
+  <div class="table-wrap">
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="جستجو در نام یا سمت..." oninput="filterTable()">
+      <select id="deptFilter" onchange="filterTable()">
+        <option value="">همه دپارتمان‌ها</option>
+      </select>
+      <span class="count-badge" id="tableCount"></span>
+    </div>
+    <table id="personnelTable">
+      <thead>
+        <tr>
+          <th>#</th><th>نام و نام خانوادگی</th><th>سمت سازمانی</th>
+          <th>تیم / واحد</th><th>دپارتمان</th><th>مدیر مستقیم</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────
+const DEPARTMENTS = [
+  { id:"mgmt",       name:"مدیریت",          color:"#3574e2" },
+  { id:"investment", name:"سرمایه‌گذاری",    color:"#0f9e7b" },
+  { id:"analysis",   name:"تحلیل",           color:"#d4621a" },
+  { id:"operations", name:"عملیات",          color:"#8b3dd4" },
+  { id:"bizdev",     name:"توسعه کسب‌وکار",  color:"#d43a3a" },
+  { id:"compliance", name:"تطبیق مقررات",    color:"#1a9fba" },
+];
+
+const PERSONNEL = [
+  // MANAGEMENT
+  { id:58, name:"بهراد ابراهیمی",                    title:"راهبر بیزینس لاین / قائم‌مقام مدیرعامل",           team:"مدیریت",               unit:"مدیریت",                         dept:"mgmt",       manager:null },
+  { id:59, name:"گوهر صادق‌نیا",                     title:"CEO شرکت سبدگردان",                                team:"مدیریت",               unit:"مدیریت",                         dept:"mgmt",       manager:58 },
+  { id:60, name:"مینا ابراهیمی",                     title:"مدیر اجرایی پروژه‌ها",                             team:"مدیریت",               unit:"مدیریت",                         dept:"mgmt",       manager:59 },
+  { id:61, name:"سروش بهرامی",                       title:"مدیر ارتباط با کارفرمایان اندوخته و بیمه",         team:"مدیریت",               unit:"مدیریت",                         dept:"mgmt",       manager:59 },
+  // INVESTMENT - Traditional
+  { id:44, name:"مهرزاد منتظری",                     title:"مدیر سرمایه‌گذاری / مدیر صندوق آگاس",              team:"سرمایه‌گذاری متعارف",  unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:59 },
+  { id:45, name:"علی سماعی",                         title:"مدیر صندوق شتاب و بانکا",                          team:"صندوق‌های سرمایه‌گذاری",unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:44 },
+  { id:46, name:"حسن موسی‌پورآهنگر",                title:"مدیر صندوق کلید",                                  team:"صندوق‌های سرمایه‌گذاری",unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:44 },
+  { id:47, name:"علی ضرغامی",                        title:"مدیر صندوق مبتنی بر کالا",                         team:"صندوق‌های سرمایه‌گذاری",unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:44 },
+  { id:48, name:"حمیدرضا بیداری",                    title:"مدیر صندوق اندوخته",                               team:"صندوق‌های سرمایه‌گذاری",unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:44 },
+  { id:49, name:"مصطفی بابالو",                      title:"مدیر صندوق اتوآگاه / مدیر سبد",                    team:"صندوق‌های سرمایه‌گذاری",unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:44 },
+  { id:50, name:"ریحانه جوهری",                      title:"کارشناس اداری سرمایه‌گذاری متعارف",                team:"سبدگردان",             unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:44 },
+  { id:51, name:"قاسم آزاد",                         title:"مدیر صندوق‌های درآمد ثابت",                        team:"صندوق‌های درآمد ثابت", unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:44 },
+  { id:52, name:"پیام مقیمی کندلوس",                title:"مدیر صندوق همای",                                  team:"صندوق‌های درآمد ثابت", unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:51 },
+  { id:53, name:"زهرا اسدی پورآبکنار",              title:"مدیر صندوق یاقوت",                                 team:"صندوق‌های درآمد ثابت", unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:51 },
+  { id:54, name:"علی جلائیان قربانزاده",            title:"کارشناس ارزش‌گذاری",                               team:"سرمایه‌گذاری متعارف",  unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:51 },
+  { id:55, name:"امیرمسعود مختاری چلچه",            title:"کارشناس سرمایه‌گذاری صندوق‌های درآمد ثابت",        team:"صندوق‌های درآمد ثابت", unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:51 },
+  { id:56, name:"سارمن نیکلایان",                   title:"مدیر سبدگردان‌ها / مدیر صندوق پتروآگاه",           team:"سبدگردان",             unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:44 },
+  { id:57, name:"مونا حامی احمدی",                  title:"مدیر سبد",                                         team:"سبدگردان",             unit:"سرمایه‌گذاری متعارف",            dept:"investment", manager:56 },
+  // INVESTMENT - Alternative
+  { id:27, name:"شایان مسکینی مود",                 title:"مدیر ریسک و کوانت",                                team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:59 },
+  { id:28, name:"امیرحسین سلیمی",                   title:"سرپرست دیتا",                                      team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:29, name:"سجاد تاج‌الدین",                   title:"سرپرست تک",                                        team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:30, name:"مهدی خزائی",                       title:"سرپرست ریسرچ",                                     team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:31, name:"سپیده ابوطالبی",                   title:"سرپرست دسک",                                       team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:32, name:"ایمان مقصودی نیستانکی",            title:"کارشناس ارشد کوانت - سطح ۱",                       team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:33, name:"خشایار رحیمی حسینه",               title:"کارشناس ارشد کوانت - سطح ۱",                       team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:34, name:"علی خزیمه",                        title:"کارشناس ارشد کوانت - سطح ۱",                       team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:35, name:"امیررضا مدنی فرد",                 title:"کارشناس ارشد کوانت - سطح ۱",                       team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:36, name:"محمد جامی مقدم",                   title:"کارشناس ارشد کوانت - سطح ۲",                       team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:37, name:"زهرا طهماسبیان قهفرخی",            title:"کارشناس ارشد کوانت - سطح ۲",                       team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:38, name:"فرهنگ رایانی مخصوص",               title:"کارشناس ارشد کوانت - سطح ۲",                       team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:39, name:"مارال قوامی پور",                  title:"کارشناس کوانت - سطح ۲",                            team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:40, name:"رعنا پیروزوند",                    title:"کارشناس کوانت - سطح ۱",                            team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:41, name:"مینا شیری سرچشمه",                 title:"کارشناس کوانت - سطح ۱",                            team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:42, name:"محمدحسن کارگر شورکی",              title:"کارشناس کوانت - سطح ۲",                            team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:43, name:"علیرضا آقامحمدی",                  title:"کارشناس کوانت - سطح ۲",                            team:"ریسک و کوانت",         unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:27 },
+  { id:62, name:"امیرحسین فلاح حسینی",              title:"مدیر بازار خصوصی",                                 team:"سرمایه‌گذاری خصوصی",  unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:59 },
+  { id:63, name:"پویا دلگشای فشتمی",                title:"مدیر واحد مشتقه / مدیر سبد مشتقه",                team:"مشتقه",                unit:"سرمایه‌گذاری جایگزین",           dept:"investment", manager:59 },
+  // ANALYSIS
+  { id: 9, name:"محمد میکائیلی",                    title:"مدیر تحلیل",                                       team:"تحلیل",                unit:"تحلیل",                          dept:"analysis",   manager:59 },
+  { id:10, name:"محمدجواد ضیائی",                   title:"کارشناس ارشد Buy Side / مدیر صندوق آوان ژرف",      team:"Buy side",             unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:11, name:"محمد صالحی",                       title:"کارشناس ارشد تحلیل Buy Side",                      team:"Buy side",             unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:12, name:"ایمان احدپور",                     title:"کارشناس ارشد تحلیل Buy Side",                      team:"Buy side",             unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:13, name:"سالار رنجبر",                      title:"کارشناس تحلیل Buy Side",                           team:"Buy side",             unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:14, name:"پویا رضائی شهرکی",                 title:"کارشناس ارشد Buy Side / مدیر صندوق آلیاژ",         team:"Buy side",             unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:15, name:"نسترن موسوی",                      title:"کارشناس ارشد تحلیل Buy Side",                      team:"Buy side",             unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:16, name:"نسرین غلامیان",                    title:"کارشناس ارشد تحلیل Buy Side",                      team:"Buy side",             unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:17, name:"کیومرث حکیمی",                     title:"سرپرست Sell Side",                                 team:"sell side",            unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:18, name:"امید حصاری",                       title:"کارشناس تحلیل Sell Side",                          team:"sell side",            unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:19, name:"شاهین قناد",                       title:"کارشناس تحلیل Sell Side",                          team:"sell side",            unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:20, name:"زینب فریادرس",                     title:"کارشناس تحلیل Sell Side",                          team:"sell side",            unit:"تحلیل",                          dept:"analysis",   manager:9 },
+  { id:21, name:"شقایق ضیائی",                      title:"سرپرست مطالعات اقتصادی / مدیر صندوق مروارید",      team:"تحلیل",               unit:"مطالعات اقتصادی",               dept:"analysis",   manager:9 },
+  { id:22, name:"میلاد سالمی",                      title:"کارشناس مطالعات اقتصادی",                          team:"تحلیل",               unit:"مطالعات اقتصادی",               dept:"analysis",   manager:9 },
+  { id:23, name:"سید پارسا قزوینی",                 title:"کارشناس مطالعات اقتصادی",                          team:"تحلیل",               unit:"مطالعات اقتصادی",               dept:"analysis",   manager:9 },
+  // OPERATIONS
+  { id:64, name:"بنت‌الهدا نورپناه",                title:"مدیر عملیات صندوق‌های سرمایه‌گذاری",               team:"عملیات صندوق‌ها",     unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:59 },
+  { id:65, name:"مینا اقازاده",                     title:"مسئول دفتر مالی و اجراییات صندوق‌ها",              team:"عملیات صندوق‌ها",     unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:66, name:"الناز اخته‌پادی",                  title:"سرپرست اجراییات صندوق‌ها",                         team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:67, name:"هانیه عسگرزاده",                   title:"کارشناس ارشد اجراییات صندوق‌ها",                   team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:68, name:"فاطمه ترابی خالدی",                title:"کارشناس اجراییات صندوق‌ها",                        team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:69, name:"سیده صدف اخوی",                    title:"کارشناس اجراییات صندوق‌ها",                        team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:70, name:"زهرا شجاعی",                       title:"کارشناس اداری-مالی اجراییات صندوق‌ها",             team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:71, name:"سمیرا موسوی",                      title:"کارشناس اجراییات صندوق‌ها",                        team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:73, name:"یگانه غلامی‌پور",                  title:"کارشناس اجراییات صندوق‌ها",                        team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:74, name:"سپیده رحمانی",                     title:"کارشناس اجراییات صندوق‌ها",                        team:"مالی صندوق‌ها",       unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:75, name:"فریما سیف",                        title:"کارشناس اجراییات صندوق‌ها",                        team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:76, name:"سهیلا افتاده",                     title:"کارشناس مالی صندوق‌ها",                            team:"مالی صندوق‌ها",       unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:77, name:"رقیه روانبخش",                     title:"کارشناس اجراییات صندوق‌ها",                        team:"مالی صندوق‌ها",       unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:78, name:"جواد مرادپورطالشی",                title:"سرپرست مالی صندوق‌ها",                             team:"مالی صندوق‌ها",       unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:79, name:"پریسا شاکری",                      title:"کارشناس مالی صندوق‌ها",                            team:"مالی صندوق‌ها",       unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:80, name:"علیرضا سلیمانی ملکان",             title:"کارشناس مالی صندوق‌ها",                            team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:81, name:"مهزاد کوشکی",                      title:"کارشناس مالی صندوق‌ها",                            team:"اجراییات صندوق‌ها",   unit:"عملیات صندوق‌های سرمایه‌گذاری", dept:"operations", manager:64 },
+  { id:82, name:"منصوره سادات پوروهاب",             title:"سرپرست مالی شرکت سبدگردان",                       team:"مالی سبدگردان",       unit:"مالی",                           dept:"operations", manager:59 },
+  { id:83, name:"وحید خلیلی",                       title:"کارشناس ارشد مالی سبدگردان",                       team:"مالی سبدگردان",       unit:"مالی",                           dept:"operations", manager:82 },
+  { id:84, name:"علی اویلقی",                       title:"کارشناس مالی سبدگردان",                            team:"مالی سبدگردان",       unit:"مالی",                           dept:"operations", manager:82 },
+  { id:85, name:"سجاد رفیعی",                       title:"کارشناس مالی سبدگردان",                            team:"مالی سبدگردان",       unit:"مالی",                           dept:"operations", manager:82 },
+  { id:86, name:"علیرضا حجت‌نیا",                   title:"مدیر مشاوران و پشتیبانان سبدها",                   team:"مشاوران و پشتیبانان", unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:59 },
+  { id:87, name:"الهه ناصری منفرد",                 title:"سرپرست پشتیبانی سبدها",                           team:"پشتیبانی سبدها",      unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:86 },
+  { id:88, name:"احسان عبدویس",                     title:"کارشناس مشاوره سبدها",                             team:"مشاوره سبدها",        unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:86 },
+  { id:89, name:"فاطمه السادات احمدیان اردستانی",   title:"کارشناس مشاوره سبدها",                             team:"مشاوره سبدها",        unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:86 },
+  { id:90, name:"فائزه بهرامی کلیشمی",              title:"کارشناس پشتیبانی مشاوران سرمایه‌گذاری",           team:"پشتیبانی سبدها",      unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:86 },
+  { id:91, name:"محمدعلی بانکه‌ساز",                title:"کارشناس ارشد مشاوره سبدها",                        team:"مشاوره سبدها",        unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:86 },
+  { id:92, name:"معصومه شهبازی",                    title:"کارشناس ارشد مشاوره سبدها",                        team:"مشاوره سبدها",        unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:86 },
+  { id:93, name:"مهسا اسکندری",                     title:"مسئول دفتر مشاوران و پشتیبانان سبدها",            team:"مشاوران و پشتیبانان", unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:86 },
+  { id:94, name:"میلاد فیاضی قرانقیه",              title:"کارشناس ارشد پشتیبانی سبدها",                     team:"پشتیبانی سبدها",      unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:86 },
+  { id:95, name:"ترانه صدر منوچهری",                title:"کارشناس پشتیبانی سبدها",                          team:"پشتیبانی سبدها",      unit:"مشاوران و پشتیبانان سبدها",      dept:"operations", manager:86 },
+  // BUSINESS DEV
+  { id: 1, name:"مهران امیدی",                      title:"مدیر عملیات بازار",                                team:"عملیات بازار",        unit:"عملیات بازار",                   dept:"bizdev",     manager:59 },
+  { id: 2, name:"مریم شاپناهی",                     title:"کارشناس عملیات بازار",                             team:"عملیات بازار",        unit:"عملیات بازار",                   dept:"bizdev",     manager:1 },
+  { id: 3, name:"پویا شریفی",                       title:"کارشناس عملیات بازار",                             team:"عملیات بازار",        unit:"عملیات بازار",                   dept:"bizdev",     manager:1 },
+  { id: 4, name:"الهام خوشنویسان",                  title:"کارشناس ارشد عملیات بازار",                        team:"عملیات بازار",        unit:"عملیات بازار",                   dept:"bizdev",     manager:1 },
+  { id: 5, name:"عرفان رحمانی",                     title:"مدیر تحقیق و توسعه",                               team:"تحقیق و توسعه",       unit:"تحقیق و توسعه",                  dept:"bizdev",     manager:59 },
+  { id: 6, name:"سارا کریمی متعلق محله",            title:"کارشناس تحقیق و توسعه",                            team:"تحقیق و توسعه",       unit:"تحقیق و توسعه",                  dept:"bizdev",     manager:5 },
+  { id: 7, name:"محمد حیدری",                       title:"کارشناس تحقیق و توسعه",                            team:"تحقیق و توسعه",       unit:"تحقیق و توسعه",                  dept:"bizdev",     manager:5 },
+  { id: 8, name:"نرجس وثوقی رودبنه",                title:"کارشناس تحقیق و توسعه",                            team:"تحقیق و توسعه",       unit:"تحقیق و توسعه",                  dept:"bizdev",     manager:5 },
+  // COMPLIANCE
+  { id:24, name:"نگار قوامی‌پور",                   title:"مدیر تطبیق مقررات",                                team:"تطبیق مقررات",        unit:"تطبیق مقررات",                   dept:"compliance", manager:59 },
+  { id:25, name:"ژیلا مربوتی",                      title:"کارشناس حقوقی تطبیق مقررات",                       team:"تطبیق مقررات",        unit:"تطبیق مقررات",                   dept:"compliance", manager:24 },
+  { id:26, name:"حامد محسن‌پور",                    title:"کارشناس نظارت تطبیق مقررات",                       team:"تطبیق مقررات",        unit:"تطبیق مقررات",                   dept:"compliance", manager:24 },
+];
+
+// ─── HELPERS ─────────────────────────────────────────────────────────
+const byId      = id => PERSONNEL.find(p => p.id === id);
+const deptInfo  = id => DEPARTMENTS.find(d => d.id === id);
+const deptCount = id => PERSONNEL.filter(p => p.dept === id).length;
+
+function deptColor(id) {
+  const dark = document.body.classList.contains('dark');
+  const map = {
+    mgmt:       dark ? '#4f8ef7' : '#3574e2',
+    investment: dark ? '#2ec4a0' : '#0f9e7b',
+    analysis:   dark ? '#e07b39' : '#d4621a',
+    operations: dark ? '#a855f7' : '#8b3dd4',
+    bizdev:     dark ? '#e85d5d' : '#d43a3a',
+    compliance: dark ? '#3bbfcf' : '#1a9fba',
+  };
+  return map[id] || deptInfo(id).color;
+}
+
+// ─── STATS BAR ───────────────────────────────────────────────────────
+function buildStats() {
+  const total = PERSONNEL.length;
+  const deptCards = DEPARTMENTS.map(d => {
+    const c = deptCount(d.id);
+    const color = deptColor(d.id);
+    return `<div class="stat-dept" style="--dcolor:${color}" onclick="goToTableFiltered('${d.id}')" title="مشاهده پرسنل ${d.name}">
+              <div class="s-val">${c}</div>
+              <div class="s-label">${d.name}</div>
+            </div>`;
+  }).join('');
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-total">
+      <div class="s-val">${total}</div>
+      <div class="s-label">کل پرسنل</div>
+    </div>
+    <div class="stats-depts">${deptCards}</div>`;
+}
+
+// ─── OVERVIEW ────────────────────────────────────────────────────────
+function buildOverview() {
+  const top  = byId(58);
+  const ceo  = byId(59);
+  const directReports = PERSONNEL.filter(p => p.manager === 59 && p.dept === 'mgmt');
+
+  // Investment sub-units
+  const investSubs = [
+    {
+      label: 'سرمایه‌گذاری متعارف',
+      head:  byId(44),
+      count: PERSONNEL.filter(p => p.dept==='investment' && p.unit==='سرمایه‌گذاری متعارف').length,
+    },
+    {
+      label: 'سرمایه‌گذاری جایگزین',
+      head:  byId(27),
+      count: PERSONNEL.filter(p => p.dept==='investment' && p.unit==='سرمایه‌گذاری جایگزین').length,
+    },
+  ];
+
+  // Depts with modal sub-structure
+  const MODAL_DEPTS = ['analysis','operations','bizdev'];
+  const nonMgmt = DEPARTMENTS.filter(d => d.id !== 'mgmt');
+
+  function buildDeptCard(d) {
+    const color = deptColor(d.id);
+    const cnt   = deptCount(d.id);
+
+    if (d.id === 'investment') {
+      const investColor = deptColor('investment');
+      const investCnt   = deptCount('investment');
+      return `
+        <div class="ov-invest-card" style="--investment:${investColor}">
+          <div class="ov-invest-header" onclick="toggleInvestExpand(event)">
+            <div class="dc-name">سرمایه‌گذاری</div>
+            <div class="dc-heads">${investSubs[0].head.name}<br>${investSubs[1].head.name}</div>
+          </div>
+          <div class="ov-invest-footer">
+            <div class="dc-count">👥 ${investCnt} نفر</div>
+            <button class="ov-invest-toggle" onclick="toggleInvestExpand(event)">
+              زیربخش‌ها <span class="chevron-icon" id="investChevron">▼</span>
+            </button>
+          </div>
+          <div class="ov-invest-sub" id="investSubPanel">
+            ${investSubs.map(s => `
+              <div class="ov-sub-badge">
+                <div class="sb-label">${s.label}</div>
+                <div class="sb-head">${s.head.name}</div>
+                <div class="sb-count">${s.count} نفر</div>
+              </div>`).join('')}
+            <button class="invest-goto-btn" onclick="goToTableFiltered('investment');event.stopPropagation()">
+              📋 مشاهده همه پرسنل سرمایه‌گذاری
+            </button>
+          </div>
+        </div>`;
+    }
+
+    // Head person
+    const headP = PERSONNEL.find(p => p.dept === d.id && p.manager === 59)
+                || PERSONNEL.find(p => p.dept === d.id);
+    const hasModal = MODAL_DEPTS.includes(d.id);
+    const hint = hasModal ? '▸ جزئیات تیم‌ها' : '▸ مشاهده پرسنل';
+
+    return `
+      <div class="ov-dept-card" style="--dcolor:${color}" onclick="handleDeptClick('${d.id}')">
+        <div class="ov-dept-card-top">
+          <div class="dc-name">${d.name}</div>
+          <div class="dc-head">${headP ? headP.name : ''}</div>
+          <div class="dc-head-title">${headP ? headP.title : ''}</div>
+        </div>
+        <div class="ov-dept-card-footer">
+          <div class="dc-count">👥 ${cnt} نفر</div>
+          <div class="dc-hint">${hint}</div>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('overviewCanvas').innerHTML = `
+    <div class="ov-tree">
+
+      <!-- Tier 1: Group leader -->
+      <div style="display:flex;justify-content:center">
+        <div class="ov-node-group">
+          <div class="n-tag">AGAH Group — راهبر بیزینس لاین</div>
+          <div class="n-name">${top.name}</div>
+          <div class="n-title">${top.title}</div>
+        </div>
+      </div>
+
+      <div class="conn-v" style="height:30px"></div>
+
+      <!-- Tier 2: CEO -->
+      <div style="display:flex;justify-content:center">
+        <div class="ov-node-ceo">
+          <div class="n-tag">مدیرعامل — CEO</div>
+          <div class="n-name">${ceo.name}</div>
+          <div class="n-title">${ceo.title}</div>
+        </div>
+      </div>
+
+      <!-- Fork to direct mgmt reports -->
+      <div style="position:relative;width:420px;margin:0 auto;height:32px;flex-shrink:0">
+        <div style="position:absolute;left:50%;top:0;width:2px;height:16px;background:var(--border);transform:translateX(-50%)"></div>
+        <div style="position:absolute;top:16px;left:8%;right:8%;height:2px;background:var(--border)"></div>
+        <div style="position:absolute;top:16px;left:8%;width:2px;height:16px;background:var(--border)"></div>
+        <div style="position:absolute;top:16px;right:8%;width:2px;height:16px;background:var(--border)"></div>
+      </div>
+
+      <!-- Tier 3: Mina + Soroush -->
+      <div class="ov-direct-row">
+        ${directReports.map(p => `
+          <div class="ov-direct-node">
+            <div class="n-name">${p.name}</div>
+            <div class="n-title">${p.title}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="conn-v" style="height:28px"></div>
+
+      <!-- Connector spread to departments -->
+      <div style="position:relative;width:100%;height:20px">
+        <div style="position:absolute;left:50%;top:0;width:2px;height:10px;background:var(--border);transform:translateX(-50%)"></div>
+        <div style="position:absolute;top:10px;left:6%;right:6%;height:2px;background:var(--border)"></div>
+      </div>
+
+      <!-- Tier 4: Department cards -->
+      <div class="ov-depts-row">
+        ${nonMgmt.map(d => `<div class="ov-dept-col">${buildDeptCard(d)}</div>`).join('')}
+      </div>
+
+    </div>`;
+}
+
+// ─── INVEST EXPAND ───────────────────────────────────────────────────
+function toggleInvestExpand(event) {
+  event.stopPropagation();
+  const panel   = document.getElementById('investSubPanel');
+  const chevron = document.getElementById('investChevron');
+  const isOpen  = panel.classList.toggle('open');
+  chevron.classList.toggle('open', isOpen);
+}
+
+// ─── DEPT CLICK ──────────────────────────────────────────────────────
+const MODAL_DEPTS = ['analysis','operations','bizdev'];
+function handleDeptClick(deptId) {
+  if (MODAL_DEPTS.includes(deptId)) openDeptModal(deptId);
+  else goToTableFiltered(deptId);
+}
+
+function openDeptModal(deptId) {
+  const dept   = deptInfo(deptId);
+  const color  = deptColor(deptId);
+  const people = PERSONNEL.filter(p => p.dept === deptId);
+  const units  = [...new Set(people.map(p => p.unit))];
+
+  const teamsHTML = units.map(unit => {
+    const unitPeople = people.filter(p => p.unit === unit);
+    return `
+      <div class="modal-team-group">
+        <div class="modal-team-label" style="--dcolor:${color}">
+          <span>${unit}</span> — ${unitPeople.length} نفر
+        </div>
+        <div class="modal-person-grid">
+          ${unitPeople.map(p => `
+            <div class="modal-person" style="--dcolor:${color}">
+              <div class="mp-name">${p.name}</div>
+              <div class="mp-title">${p.title}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('modalBox').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-color-bar" style="background:${color}"></div>
+      <div class="modal-title" style="color:${color}">${dept.name}</div>
+      <div class="modal-count">${people.length} نفر</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" style="--dcolor:${color}">
+      ${teamsHTML}
+      <button class="modal-goto-btn" style="--dcolor:${color}"
+        onclick="closeModal();goToTableFiltered('${deptId}')">
+        📋 مشاهده جدول کامل پرسنل ${dept.name}
+      </button>
+    </div>`;
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+function closeModalOnBg(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ─── GO TO TABLE WITH FILTER ─────────────────────────────────────────
+function goToTableFiltered(deptId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-table').classList.add('active');
+  document.querySelectorAll('.tab-btn')[2].classList.add('active');
+  document.getElementById('deptFilter').value = deptId;
+  document.getElementById('searchInput').value = '';
+  filterTable();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── FULL CHART ───────────────────────────────────────────────────────
+function buildFull() {
+  let html = '';
+  DEPARTMENTS.forEach(dept => {
+    const people = PERSONNEL.filter(p => p.dept === dept.id);
+    const units  = [...new Set(people.map(p => p.unit))];
+    const color  = deptColor(dept.id);
+    html += `
+      <div class="dept-block" id="dept-${dept.id}">
+        <div class="dept-block-header" onclick="toggleDept('${dept.id}')">
+          <div class="dept-color-bar" style="background:${color}"></div>
+          <div class="dept-block-title" style="color:${color}">${dept.name}</div>
+          <div class="dept-block-count">${people.length} نفر</div>
+          <div class="dept-chevron">▼</div>
+        </div>
+        <div class="dept-block-body">`;
+    units.forEach(unit => {
+      const unitPeople = people.filter(p => p.unit === unit);
+      html += `
+        <div class="unit-group">
+          <div class="unit-label" style="color:${color}bb">${unit}</div>
+          <div class="person-grid">
+            ${unitPeople.map(p => {
+              const mgr = p.manager ? byId(p.manager) : null;
+              return `
+                <div class="person-card">
+                  <div class="person-card-name">${p.name}</div>
+                  <div class="person-card-title">${p.title}</div>
+                  <div class="person-card-team">${p.team}</div>
+                  ${mgr ? `<div class="person-card-manager"><span class="manager-badge" style="background:${color}"></span>${mgr.name}</div>` : ''}
+                </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById('fullChart').innerHTML = html;
+}
+
+// ─── TABLE ────────────────────────────────────────────────────────────
+function buildTable() {
+  const sel = document.getElementById('deptFilter');
+  DEPARTMENTS.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.id; opt.textContent = d.name;
+    sel.appendChild(opt);
+  });
+  filterTable();
+}
+
+function filterTable() {
+  const q    = document.getElementById('searchInput').value.toLowerCase();
+  const dept = document.getElementById('deptFilter').value;
+  const filtered = PERSONNEL.filter(p => {
+    const matchQ = !q || p.name.includes(q) || p.title.toLowerCase().includes(q) || p.team.includes(q);
+    const matchD = !dept || p.dept === dept;
+    return matchQ && matchD;
+  });
+  document.getElementById('tableCount').textContent = `${filtered.length} نفر`;
+  document.getElementById('tableBody').innerHTML = filtered.map((p, i) => {
+    const d     = deptInfo(p.dept);
+    const color = deptColor(p.dept);
+    const mgr   = p.manager ? byId(p.manager) : null;
+    return `
+      <tr>
+        <td class="row-num">${i+1}</td>
+        <td style="font-weight:600">${p.name}</td>
+        <td style="color:var(--text-muted);font-size:12px">${p.title}</td>
+        <td style="font-size:12px">${p.team}</td>
+        <td><span class="dept-pill" style="background:${color}20;color:${color}">${d.name}</span></td>
+        <td style="font-size:12px;color:var(--text-muted)">${mgr ? mgr.name : '—'}</td>
+      </tr>`;
+  }).join('');
+}
+
+// ─── TOGGLE DEPT ─────────────────────────────────────────────────────
+function toggleDept(id) {
+  document.getElementById('dept-'+id).classList.toggle('collapsed');
+}
+
+// ─── TAB SWITCH ──────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── THEME ────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = dark ? '☀️ حالت روشن' : '🌙 حالت تاریک';
+  buildStats();
+  buildOverview();
+  buildFull();
+  filterTable();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+buildStats();
+buildOverview();
+buildFull();
+buildTable();
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
